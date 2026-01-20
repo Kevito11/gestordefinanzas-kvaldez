@@ -1,0 +1,14 @@
+[
+  {
+    "id": "qMf0Xp_lbSJTYbBBTiJMc",
+    "username": "kvaldez",
+    "passwordHash": "$2b$10$dcqFOx6S66Sk0NIe4RYJD.7wCaAI7aZuu69bgkQ2czHF9vEmfLMFe",
+    "name": "Kevin Valdez"
+  },
+  {
+    "id": "eqeK-cGZhrX7YpE20Mhyg",
+    "username": "mestevez",
+    "passwordHash": "$2b$10$WaLmO9qOIPumAljofGHeBuH3JwjT1b6wDjKJBDuiFhiaO4js1WZr2",
+    "name": "Masquiel Estevez"
+  }
+]

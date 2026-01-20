@@ -1,0 +1,224 @@
+.section {
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 24px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.section:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.isOpen {
+    border-color: var(--primary-color);
+}
+
+.header {
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    background-color: transparent;
+    transition: background-color 0.2s ease;
+    user-select: none;
+}
+
+.header:hover {
+    background-color: rgba(79, 70, 229, 0.02);
+}
+
+.titleContainer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.title {
+    color: var(--text-main);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.headerRight {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.total {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.toggleIcon {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.isOpen .toggleIcon {
+    transform: rotate(180deg);
+    color: var(--primary-color);
+}
+
+/* Add Button in Header */
+.addHeaderBtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--bg-color);
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.addHeaderBtn:hover {
+    background-color: var(--primary-color);
+    color: white;
+    transform: scale(1.1);
+}
+
+.addHeaderBtn.adding {
+    background-color: var(--danger-color);
+    color: white;
+    transform: rotate(45deg);
+}
+
+/* Content Area */
+.contentWrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.contentWrapper.open {
+    grid-template-rows: 1fr;
+}
+
+.contentInner {
+    overflow: hidden;
+}
+
+.content {
+    padding: 0 24px 24px 24px;
+}
+
+/* Add Panel (Top of content) */
+.addPanel {
+    background-color: var(--bg-color);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-color);
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.addControls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.selectCategory {
+    padding: 10px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    flex: 1;
+    font-size: 0.95rem;
+    color: var(--text-main);
+    background-color: white;
+    transition: border-color 0.2s;
+}
+
+.selectCategory:focus {
+    border-color: var(--primary-color);
+}
+
+.actionBtn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.confirmBtn {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.confirmBtn:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.confirmBtn:active {
+    transform: translateY(0);
+}
+
+.confirmBtn:disabled {
+    background-color: var(--text-secondary);
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.customBtn {
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+
+.customBtn:hover {
+    background-color: rgba(79, 70, 229, 0.05);
+}
+
+.emptyState {
+    padding: 30px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    background-color: rgba(249, 250, 251, 0.5);
+}
+
+@media (max-width: 600px) {
+    .addControls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .selectCategory,
+    .actionBtn {
+        width: 100%;
+    }
+}

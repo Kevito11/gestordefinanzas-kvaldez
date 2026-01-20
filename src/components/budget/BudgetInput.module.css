@@ -1,0 +1,147 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: white;
+  transition: background-color 0.2s;
+}
+
+.container:last-child {
+  border-bottom: none;
+}
+
+.container:hover {
+  background-color: #fcfcfd;
+}
+
+.labelContainer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.label {
+  font-weight: 500;
+  color: var(--text-main);
+  font-size: 0.95rem;
+}
+
+.nameInput {
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  width: 100%;
+  max-width: 240px;
+  font-size: 0.95rem;
+  background: transparent;
+  transition: all 0.2s;
+}
+
+.nameInput:hover {
+  background-color: var(--bg-color);
+}
+
+.nameInput:focus {
+  background-color: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+}
+
+.inputs {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.amountInput {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  width: 110px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-main);
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.amountInput:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+}
+
+.selectInput {
+  padding: 8px 30px 8px 12px;
+  /* Extra padding for arrow */
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: white;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  /* Custom arrow could be added here */
+}
+
+.selectInput:hover {
+  border-color: #cbd5e1;
+}
+
+.deleteButton {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  opacity: 0;
+  transition: all 0.2s;
+}
+
+.container:hover .deleteButton {
+  opacity: 1;
+}
+
+.deleteButton:hover {
+  background-color: #fee2e2;
+  color: var(--danger-color);
+}
+
+@media (max-width: 600px) {
+  .container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .labelContainer {
+    width: 100%;
+  }
+
+  .nameInput {
+    max-width: none;
+  }
+
+  .inputs {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .amountInput {
+    flex: 1;
+  }
+
+  .selectInput {
+    flex: 1;
+    min-width: 0;
+  }
+}

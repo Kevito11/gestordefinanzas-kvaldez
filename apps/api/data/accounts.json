@@ -1,0 +1,20 @@
+[
+  {
+    "id": "m6-HUHoWd0bPmCeV-pOMb",
+    "name": "",
+    "currency": "DOP",
+    "salaryType": "monthly",
+    "salary": 0,
+    "userId": "default-user",
+    "createdAt": "2026-01-06T23:59:15.549Z"
+  },
+  {
+    "id": "L0oJwCiKS3ZLXuuMYSIfb",
+    "name": "",
+    "currency": "DOP",
+    "salaryType": "monthly",
+    "salary": 0,
+    "userId": "default-user",
+    "createdAt": "2026-01-06T23:59:58.671Z"
+  }
+]
