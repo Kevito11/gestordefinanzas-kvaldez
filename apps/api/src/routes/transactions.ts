@@ -1,6 +1,7 @@
 // apps/api/src/routes/transactions.ts
 import { Router } from 'express';
 import { nanoid } from 'nanoid';
+import { authenticateToken } from '../middleware/auth.js';
 import { readJson, writeJson } from '../db/fileDb.js';
 import type { Transaction } from '../../../../src/types/transaction';
 import { isoNow } from '../../../../src/lib/date';
@@ -8,12 +9,12 @@ import { isoNow } from '../../../../src/lib/date';
 const FILE = 'transactions.json';
 const router = Router();
 
-const DEFAULT_USER_ID = 'default-user';
+router.use(authenticateToken as any);
 
-router.get('/', (req, res) => {
+router.get('/', (req: any, res) => {
   const data = readJson<Transaction[]>(FILE, []);
   const { accountId, from, to } = req.query;
-  let filtered = data.filter(t => t.userId === DEFAULT_USER_ID);
+  let filtered = data.filter(t => t.userId === req.user.userId);
   if (accountId) filtered = filtered.filter(t => t.accountId === String(accountId));
   if (from) filtered = filtered.filter(t => new Date(t.date) >= new Date(String(from)));
   if (to) filtered = filtered.filter(t => new Date(t.date) <= new Date(String(to)));
@@ -23,7 +24,7 @@ router.get('/', (req, res) => {
 router.post('/', (req, res) => {
   const data = readJson<Transaction[]>(FILE, []);
   const tx: Transaction = {
-    id: nanoid(),
+    id: nanoid(8),
     accountId: req.body.accountId,
     type: req.body.type,
     amount: Number(req.body.amount),
@@ -33,7 +34,7 @@ router.post('/', (req, res) => {
     date: req.body.date ?? isoNow(),
     counterpartAccountId: req.body.counterpartAccountId,
     tags: req.body.tags ?? [],
-    userId: DEFAULT_USER_ID,
+    userId: (req as any).user.userId,
     createdAt: isoNow(),
   };
   data.push(tx);
@@ -43,7 +44,7 @@ router.post('/', (req, res) => {
 
 router.put('/:id', (req, res) => {
   const data = readJson<Transaction[]>(FILE, []);
-  const idx = data.findIndex(t => t.id === req.params.id && t.userId === DEFAULT_USER_ID);
+  const idx = data.findIndex(t => t.id === req.params.id && t.userId === (req as any).user.userId);
   if (idx === -1) return res.status(404).json({ error: 'Not found' });
   data[idx] = { ...data[idx], ...req.body, updatedAt: isoNow() };
   writeJson(FILE, data);
@@ -52,7 +53,7 @@ router.put('/:id', (req, res) => {
 
 router.delete('/:id', (req, res) => {
   const data = readJson<Transaction[]>(FILE, []);
-  const next = data.filter(t => t.id !== req.params.id || t.userId !== DEFAULT_USER_ID);
+  const next = data.filter(t => t.id !== req.params.id || t.userId !== (req as any).user.userId);
   writeJson(FILE, next);
   res.status(204).end();
 });

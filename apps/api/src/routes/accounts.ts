@@ -1,6 +1,7 @@
 // apps/api/src/routes/accounts.ts
 import { Router } from 'express';
 import { nanoid } from 'nanoid';
+import { authenticateToken } from '../middleware/auth.js';
 import { readJson, writeJson } from '../db/fileDb';
 import type { Account } from '../../../../src/types/account';
 import { isoNow } from '../../../../src/lib/date';
@@ -46,23 +47,23 @@ const readMigratedData = (): Account[] => {
   return data as Account[];
 };
 
-const DEFAULT_USER_ID = 'default-user';
+router.use(authenticateToken as any);
 
-router.get('/', (_req, res) => {
-  const data = readMigratedData().filter(ac => ac.userId === DEFAULT_USER_ID);
+router.get('/', (req: any, res) => {
+  const data = readMigratedData().filter(a => a.userId === req.user.userId);
   res.json(data);
 });
 
-router.post('/', (req, res) => {
+router.post('/', (req: any, res) => {
   const data = readMigratedData();
   const account: Account = {
-    id: nanoid(),
+    id: nanoid(8),
     name: req.body.name,
     currency: req.body.currency ?? 'DOP',
     salaryType: req.body.salaryType ?? 'monthly',
     salary: Number(req.body.salary),
     extras: req.body.extras ? Number(req.body.extras) : undefined,
-    userId: DEFAULT_USER_ID,
+    userId: (req as any).user.userId,
     createdAt: isoNow(),
   };
   data.push(account);
@@ -70,18 +71,18 @@ router.post('/', (req, res) => {
   res.status(201).json(account);
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', (req: any, res) => {
   const data = readMigratedData();
-  const idx = data.findIndex(a => a.id === req.params.id && a.userId === DEFAULT_USER_ID);
+  const idx = data.findIndex(ac => ac.id === req.params.id && ac.userId === (req as any).user.userId);
   if (idx === -1) return res.status(404).json({ error: 'Not found' });
   data[idx] = { ...data[idx], ...req.body, updatedAt: isoNow() };
   writeJson(FILE, data);
   res.json(data[idx]);
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', (req: any, res) => {
   const data = readMigratedData();
-  const next = data.filter(a => a.id !== req.params.id || a.userId !== DEFAULT_USER_ID);
+  const next = data.filter(ac => ac.id !== req.params.id || ac.userId !== (req as any).user.userId);
   writeJson(FILE, next);
   res.status(204).end();
 });

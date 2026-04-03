@@ -1,20 +1,20 @@
 [
   {
-    "id": "m6-HUHoWd0bPmCeV-pOMb",
-    "name": "",
+    "id": "DT9KFe2M",
+    "name": "Sueldo de Joelmary",
     "currency": "DOP",
     "salaryType": "monthly",
-    "salary": 0,
-    "userId": "default-user",
-    "createdAt": "2026-01-06T23:59:15.549Z"
+    "salary": 60469.55,
+    "userId": "qMf0Xp_lbSJTYbBBTiJMc",
+    "createdAt": "2026-04-03T04:28:12.665Z"
   },
   {
-    "id": "L0oJwCiKS3ZLXuuMYSIfb",
-    "name": "",
+    "id": "ypAAlvKa",
+    "name": "Sueldo de Kevin",
     "currency": "DOP",
     "salaryType": "monthly",
-    "salary": 0,
-    "userId": "default-user",
-    "createdAt": "2026-01-06T23:59:58.671Z"
+    "salary": 26692,
+    "userId": "qMf0Xp_lbSJTYbBBTiJMc",
+    "createdAt": "2026-04-03T04:28:12.671Z"
   }
 ]

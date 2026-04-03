@@ -1,0 +1,74 @@
+.container {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.selectorSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.selectorSection label {
+  font-weight: 500;
+  color: #374151;
+}
+
+.select {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background-color: white;
+  width: 100%;
+  font-size: 1rem;
+}
+
+.actionsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btnExport, .btnImport {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  border: 2px dashed #d1d5db;
+  background-color: #f9fafb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.btnExport:hover, .btnImport:hover {
+  border-color: #6366f1;
+  background-color: #e0e7ff;
+  color: #4f46e5;
+}
+
+.btnExport:active, .btnImport:active {
+  transform: scale(0.98);
+}
+
+.icon {
+  font-size: 2rem;
+}
+
+.description {
+  font-size: 0.8rem;
+  color: #6b7280;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.fileInput {
+  display: none;
+}

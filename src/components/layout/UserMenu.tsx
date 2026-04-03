@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../app/providers/AuthProvider';
+import { useModal } from '../../contexts/ModalContext';
 import { exportData } from '../../features/auth/api/auth';
 import ChangePasswordModal from '../../features/auth/components/ChangePasswordModal';
 import styles from './Navbar.module.css'; // Reusing navbar styles for consistency
 
 export default function UserMenu() {
     const { user, logout, token } = useAuth();
+    const { openModal } = useModal();
     const [isOpen, setIsOpen] = useState(false);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -86,7 +88,12 @@ export default function UserMenu() {
 
                         <button className={styles.item} onClick={handleExportData}>
                             <span className={styles.icon}>📥</span>
-                            Exportar Datos
+                            Volcado Datos (JSON)
+                        </button>
+
+                        <button className={styles.item} onClick={() => { openModal('dataExchange'); setIsOpen(false); }}>
+                            <span className={styles.icon}>🗂️</span>
+                            Exportar / Importar CSV
                         </button>
 
                         <button className={styles.item} onClick={() => { setIsPasswordModalOpen(true); setIsOpen(false); }}>

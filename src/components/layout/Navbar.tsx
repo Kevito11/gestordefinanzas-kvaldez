@@ -2,11 +2,15 @@ import { useState, useRef, useEffect } from 'react';
 import { useModal } from '../../contexts/ModalContext';
 import UserMenu from './UserMenu';
 import styles from './Navbar.module.css';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../app/providers/AuthProvider';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { openModal } = useModal();
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -21,16 +25,26 @@ export default function Navbar() {
     };
   }, []);
 
-  const handleValidation = (modalType: 'accounts' | 'budgets' | 'transactions') => {
+  const handleValidation = (modalType: 'accounts' | 'budgets' | 'transactions' | 'dataExchange') => {
+    if (!user) {
+      navigate('/plan-maestro');
+      setIsOpen(false);
+      return;
+    }
     openModal(modalType);
     setIsOpen(false);
   };
 
   return (
     <nav className={styles.navbar}>
-      <h2 className={styles.title}>Mi Plataforma Financiera</h2>
+      <Link to="/" style={{ textDecoration: 'none' }}>
+        <h2 className={styles.title}>Cuentas Claras: Control Central</h2>
+      </Link>
 
       <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <Link to="/plan-maestro" className={styles.navLink} style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem' }}>
+           🚀 Plan Maestro
+        </Link>
 
         {/* Main Actions Menu */}
         <div className={styles.dropdownContainer} ref={dropdownRef}>
@@ -60,7 +74,7 @@ export default function Navbar() {
                 onClick={() => handleValidation('budgets')}
               >
                 <span className={styles.icon}>💳</span>
-                Gastos Fijos
+                Gastos Fijos (Plan Maestro)
               </button>
               <button
                 className={styles.item}
@@ -68,6 +82,14 @@ export default function Navbar() {
               >
                 <span className={styles.icon}>💰</span>
                 Transacciones
+              </button>
+              <div style={{ borderTop: '1px solid #f3f4f6', margin: '0.25rem 0' }}></div>
+              <button
+                className={styles.item}
+                onClick={() => handleValidation('dataExchange')}
+              >
+                <span className={styles.icon}>🗂️</span>
+                Importar y exportar datos
               </button>
             </div>
           )}

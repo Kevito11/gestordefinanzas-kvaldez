@@ -7,7 +7,7 @@ export interface Budget {
   amount: number;
   period: 'monthly' | 'weekly' | 'biweekly' | 'yearly';
   startDate: string;
-  endDate?: string;
+  payDay?: number;
   userId?: string;
   createdAt: string;
   updatedAt?: string;

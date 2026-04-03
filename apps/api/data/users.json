@@ -10,5 +10,11 @@
     "username": "mestevez",
     "passwordHash": "$2b$10$WaLmO9qOIPumAljofGHeBuH3JwjT1b6wDjKJBDuiFhiaO4js1WZr2",
     "name": "Masquiel Estevez"
+  },
+  {
+    "id": "83yijV1G",
+    "username": "Kevito11",
+    "passwordHash": "$2b$10$tio.YzhO.F3dt/8fXAQCo.FVrPpz91YcCXA7szaBx6BzVVj7/omjS",
+    "name": "Kevin Valdez"
   }
 ]

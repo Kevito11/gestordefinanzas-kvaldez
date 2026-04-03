@@ -212,7 +212,7 @@ const ReportsModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
             {reportData.savings < 0 && (
               <div className={styles.insight}>
                 <span className={styles.insightIcon}>⚠️</span>
-                <p>Considera reducir gastos para aumentar tus ahorros</p>
+                <p>Considera reducir pagos para aumentar tus ahorros</p>
               </div>
             )}
           </div>

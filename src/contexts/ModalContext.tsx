@@ -1,7 +1,7 @@
 // src/contexts/ModalContext.tsx
 import React, { createContext, useContext, useState, type ReactNode } from 'react';
 
-export type ModalType = 'accounts' | 'transactions' | 'budgets' | 'reports' | null;
+export type ModalType = 'accounts' | 'transactions' | 'budgets' | 'reports' | 'dataExchange' | null;
 
 interface ModalContextType {
   activeModal: ModalType;

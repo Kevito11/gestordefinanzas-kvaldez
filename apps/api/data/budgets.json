@@ -1,1 +1,122 @@
-[]
+[
+  {
+    "id": "iR27MQo_",
+    "name": "Luz",
+    "category": "Servicios",
+    "currency": "DOP",
+    "amount": 866.69,
+    "period": "monthly",
+    "startDate": "2026-04-05",
+    "userId": "qMf0Xp_lbSJTYbBBTiJMc",
+    "createdAt": "2026-04-03T04:28:12.677Z",
+    "updatedAt": "2026-04-03T04:28:12.677Z"
+  },
+  {
+    "id": "KWTnMvz7",
+    "name": "Cable",
+    "category": "Servicios",
+    "currency": "DOP",
+    "amount": 1007.5,
+    "period": "monthly",
+    "startDate": "2026-04-14",
+    "userId": "qMf0Xp_lbSJTYbBBTiJMc",
+    "createdAt": "2026-04-03T04:28:12.681Z",
+    "updatedAt": "2026-04-03T04:28:12.681Z"
+  },
+  {
+    "id": "XltYEO-i",
+    "name": "Google One (Antigravity)",
+    "category": "Suscripciones",
+    "currency": "USD",
+    "amount": 20,
+    "period": "monthly",
+    "startDate": "2026-04-08",
+    "userId": "qMf0Xp_lbSJTYbBBTiJMc",
+    "createdAt": "2026-04-03T04:28:12.685Z",
+    "updatedAt": "2026-04-03T04:28:12.685Z"
+  },
+  {
+    "id": "VG0Vwy72",
+    "name": "Spotify",
+    "category": "Suscripciones",
+    "currency": "USD",
+    "amount": 9,
+    "period": "monthly",
+    "startDate": "2026-04-01",
+    "userId": "qMf0Xp_lbSJTYbBBTiJMc",
+    "createdAt": "2026-04-03T04:28:12.692Z",
+    "updatedAt": "2026-04-03T04:28:12.692Z"
+  },
+  {
+    "id": "Afg_wHMk",
+    "name": "Préstamo Banreservas",
+    "category": "Préstamos",
+    "currency": "DOP",
+    "amount": 12208.23,
+    "period": "monthly",
+    "startDate": "2026-04-01",
+    "userId": "qMf0Xp_lbSJTYbBBTiJMc",
+    "createdAt": "2026-04-03T04:28:12.697Z",
+    "updatedAt": "2026-04-03T04:28:12.697Z"
+  },
+  {
+    "id": "NkDTygBT",
+    "name": "Préstamo de Auto",
+    "category": "Préstamos",
+    "currency": "DOP",
+    "amount": 15362.69,
+    "period": "monthly",
+    "startDate": "2026-04-01",
+    "userId": "qMf0Xp_lbSJTYbBBTiJMc",
+    "createdAt": "2026-04-03T04:28:12.702Z",
+    "updatedAt": "2026-04-03T04:28:12.702Z"
+  },
+  {
+    "id": "KYXtgJUJ",
+    "name": "Yocasta",
+    "category": "Otros pagos",
+    "currency": "DOP",
+    "amount": 10000,
+    "period": "monthly",
+    "startDate": "2026-04-01",
+    "userId": "qMf0Xp_lbSJTYbBBTiJMc",
+    "createdAt": "2026-04-03T04:28:12.727Z",
+    "updatedAt": "2026-04-03T04:28:12.727Z"
+  },
+  {
+    "id": "M7zIsnPE",
+    "name": "APAP",
+    "category": "Préstamos",
+    "currency": "DOP",
+    "amount": 12000,
+    "period": "monthly",
+    "startDate": "2026-04-01",
+    "userId": "qMf0Xp_lbSJTYbBBTiJMc",
+    "createdAt": "2026-04-03T04:28:12.731Z",
+    "updatedAt": "2026-04-03T04:28:12.731Z"
+  },
+  {
+    "id": "Lq0MNmzI",
+    "name": "BHD",
+    "category": "Préstamos",
+    "currency": "DOP",
+    "amount": 0,
+    "period": "monthly",
+    "startDate": "2026-04-01",
+    "userId": "qMf0Xp_lbSJTYbBBTiJMc",
+    "createdAt": "2026-04-03T04:28:12.736Z",
+    "updatedAt": "2026-04-03T04:28:12.737Z"
+  },
+  {
+    "id": "NxAHSnjA",
+    "name": "Qik",
+    "category": "Tarjetas de Crédito",
+    "currency": "DOP",
+    "amount": 2000,
+    "period": "monthly",
+    "startDate": "2026-04-01",
+    "userId": "qMf0Xp_lbSJTYbBBTiJMc",
+    "createdAt": "2026-04-03T04:28:12.742Z",
+    "updatedAt": "2026-04-03T04:28:12.742Z"
+  }
+]

@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import BudgetInput, { type Periodicity } from './BudgetInput';
 import styles from './BudgetSection.module.css';
 import { nanoid } from 'nanoid';
-import { calculateSalaryDeductions } from '../../utils/taxCalculations';
 
 export interface BudgetItem {
     id: string;
@@ -10,24 +9,26 @@ export interface BudgetItem {
     amount: number;
     periodicity: Periodicity;
     isCustom?: boolean;
-    showDeductions?: boolean;
+    itemCurrency?: 'USD' | 'DOP';
+    payDay?: number;
 }
 
 interface BudgetSectionProps {
     title: string;
     items: BudgetItem[];
-    suggestedCategories: string[];
+    suggestedCategories?: string[];
     currency: 'USD' | 'DOP';
-    allowDeductions?: boolean; // New prop
+    exchangeRate?: number;
+    timeframe?: 'mensual' | 'quincenal' | 'puntual';
     onChange: (items: BudgetItem[]) => void;
 }
 
 const BudgetSection: React.FC<BudgetSectionProps> = ({
     title,
     items,
-    suggestedCategories,
+    suggestedCategories = [],
     currency,
-    allowDeductions = false, // Default false
+    exchangeRate = 1,
     onChange,
 }) => {
     const [isOpen, setIsOpen] = useState(true);
@@ -37,10 +38,11 @@ const BudgetSection: React.FC<BudgetSectionProps> = ({
     const calculateMonthlyTotal = (item: BudgetItem) => {
         let baseAmount = item.amount;
 
-        // If tax deductions are enabled, use the NET salary for the budget total
-        if (item.showDeductions) {
-            const { netSalary } = calculateSalaryDeductions(item.amount, item.periodicity);
-            baseAmount = netSalary;
+        const itemCurr = item.itemCurrency || currency;
+        if (itemCurr === 'USD' && currency === 'DOP') {
+            baseAmount = baseAmount * exchangeRate;
+        } else if (itemCurr === 'DOP' && currency === 'USD') {
+            baseAmount = exchangeRate > 0 ? baseAmount / exchangeRate : baseAmount;
         }
 
         switch (item.periodicity) {
@@ -83,6 +85,7 @@ const BudgetSection: React.FC<BudgetSectionProps> = ({
             name: '',
             amount: 0,
             periodicity: 'mensual',
+            itemCurrency: currency,
             isCustom: true
         };
         onChange([newItem, ...items]); // Add to top
@@ -92,18 +95,13 @@ const BudgetSection: React.FC<BudgetSectionProps> = ({
     const handleAddFromSelection = () => {
         if (!newCategorySelection) return;
 
-        const isSalary = newCategorySelection.toLowerCase().includes('sueldo') ||
-            newCategorySelection.toLowerCase().includes('salario') ||
-            newCategorySelection.toLowerCase().includes('nómina');
-
         const newItem: BudgetItem = {
             id: nanoid(),
             name: newCategorySelection,
             amount: 0,
             periodicity: 'mensual',
-            isCustom: false,
-            // Only auto-enable if allowed AND it looks like salary
-            showDeductions: allowDeductions && isSalary
+            itemCurrency: currency,
+            isCustom: false
         };
         onChange([newItem, ...items]); // Add to top
         setNewCategorySelection('');
@@ -146,29 +144,34 @@ const BudgetSection: React.FC<BudgetSectionProps> = ({
                             <div className={styles.addPanel} onClick={(e) => e.stopPropagation()}>
                                 <h4 style={{ margin: '0 0 0.5rem 0', color: '#555' }}>Agregar nuevo concepto</h4>
                                 <div className={styles.addControls}>
-                                    <select
-                                        className={styles.selectCategory}
-                                        value={newCategorySelection}
-                                        onChange={(e) => setNewCategorySelection(e.target.value)}
-                                    >
-                                        <option value="">-- Seleccionar de la lista --</option>
-                                        {suggestedCategories.map(cat => (
-                                            <option key={cat} value={cat}>{cat}</option>
-                                        ))}
-                                    </select>
-                                    <button
-                                        className={`${styles.actionBtn} ${styles.confirmBtn}`}
-                                        onClick={handleAddFromSelection}
-                                        disabled={!newCategorySelection}
-                                    >
-                                        Agregar
-                                    </button>
-                                    <span style={{ color: '#ccc' }}>|</span>
+                                    {suggestedCategories.length > 0 && (
+                                        <>
+                                            <select
+                                                className={styles.selectCategory}
+                                                value={newCategorySelection}
+                                                onChange={(e) => setNewCategorySelection(e.target.value)}
+                                            >
+                                                <option value="">-- Seleccionar de la lista --</option>
+                                                {suggestedCategories.map(cat => (
+                                                    <option key={cat} value={cat}>{cat}</option>
+                                                ))}
+                                            </select>
+                                            <button
+                                                className={`${styles.actionBtn} ${styles.confirmBtn}`}
+                                                onClick={handleAddFromSelection}
+                                                disabled={!newCategorySelection}
+                                            >
+                                                Agregar
+                                            </button>
+                                            <span style={{ color: '#ccc' }}>|</span>
+                                        </>
+                                    )}
                                     <button
                                         className={`${styles.actionBtn} ${styles.customBtn}`}
                                         onClick={handleAddCustom}
+                                        style={{ width: suggestedCategories.length === 0 ? '100%' : 'auto' }}
                                     >
-                                        Crear Personalizado
+                                        Crear Nuevo Concepto
                                     </button>
                                 </div>
                             </div>
@@ -181,15 +184,15 @@ const BudgetSection: React.FC<BudgetSectionProps> = ({
                                     label={item.name}
                                     amount={item.amount}
                                     periodicity={item.periodicity}
+                                    itemCurrency={item.itemCurrency || currency}
+                                    payDay={item.payDay}
                                     isCustom={item.isCustom}
-                                    currency={currency}
-                                    showDeductions={item.showDeductions}
                                     onNameChange={item.isCustom ? (val) => handleItemChange(item.id, 'name', val) : undefined}
-                                    onAmountChange={(val) => handleItemChange(item.id, 'amount', val)}
-                                    onPeriodicityChange={(val) => handleItemChange(item.id, 'periodicity', val)}
+                                    onAmountChange={(val: number) => handleItemChange(item.id, 'amount', val)}
+                                    onPeriodicityChange={(val: Periodicity) => handleItemChange(item.id, 'periodicity', val)}
+                                    onItemCurrencyChange={(val: 'USD' | 'DOP') => handleItemChange(item.id, 'itemCurrency', val)}
+                                    onPayDayChange={(val: number | undefined) => handleItemChange(item.id, 'payDay', val)}
                                     onDelete={() => handleDelete(item.id)}
-                                    // Only pass the toggler if allowed
-                                    onToggleDeductions={allowDeductions ? () => handleItemChange(item.id, 'showDeductions', !item.showDeductions) : undefined}
                                 />
                             ))}
                             {items.length === 0 && !showAddPanel && (

@@ -131,17 +131,78 @@
     max-width: none;
   }
 
-  .inputs {
-    width: 100%;
-    justify-content: space-between;
-  }
+    .inputs {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
 
-  .amountInput {
-    flex: 1;
-  }
+    .amountInput {
+        flex: 1 1 100px;
+        min-width: 100px;
+    }
 
-  .selectInput {
-    flex: 1;
-    min-width: 0;
-  }
+    .selectInput {
+        flex: 1 1 100px;
+        min-width: 100px;
+    }
+}
+
+.payDayContainer {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.payDayContainer:hover {
+    border-color: #cbd5e1;
+}
+
+.payDayIcon {
+    font-size: 0.9rem;
+    filter: grayscale(1);
+    opacity: 0.7;
+}
+
+.payDayInput {
+    border: none;
+    background: transparent;
+    width: 35px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+    padding: 0;
+    text-align: center;
+}
+
+.payDayInput:focus {
+    outline: none;
+}
+
+/* Chrome, Safari, Edge, Opera */
+.payDayInput::-webkit-outer-spin-button,
+.payDayInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+.payDayInput[type=number] {
+  -moz-appearance: textfield;
+}
+
+.dueSoon {
+    background-color: #fff9f0 !important;
+    border-left: 4px solid #f39c12 !important;
+}
+
+.dueToday {
+    background-color: #fff5f5 !important;
+    border-left: 4px solid #e74c3c !important;
 }

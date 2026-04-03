@@ -32,7 +32,7 @@ export default function Register() {
             login(user, token!, expiresAt);
             navigate('/');
         } catch (err: any) {
-            setError(err.message || 'Error al registrarte');
+            setError(err.message || 'Error al crear la cuenta. Intente con otro usuario.');
         } finally {
             setIsLoading(false);
         }
@@ -41,7 +41,8 @@ export default function Register() {
     return (
         <div className={styles.container}>
             <div className={styles.card}>
-                <h1 className={styles.title}>Crear Cuenta</h1>
+                <h1 className={styles.title}>Crea tu Cuenta</h1>
+                <p className={styles.subtitle}>Comienza a tomar el control de tu dinero</p>
 
                 {error && <div className={styles.error}>{error}</div>}
 
@@ -53,19 +54,19 @@ export default function Register() {
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            placeholder="Tu nombre"
+                            placeholder="Ej: Kevin Valdez"
                             required
                         />
                     </div>
 
                     <div className={styles.field}>
-                        <label htmlFor="username">Usuario</label>
+                        <label htmlFor="username">Nombre de Usuario</label>
                         <input
                             id="username"
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            placeholder="Elige un usuario"
+                            placeholder="usuario123"
                             required
                         />
                     </div>
@@ -77,7 +78,7 @@ export default function Register() {
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Elige una contraseña"
+                            placeholder="••••••••"
                             required
                         />
                     </div>
@@ -89,19 +90,19 @@ export default function Register() {
                             type="password"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            placeholder="Repite tu contraseña"
+                            placeholder="••••••••"
                             required
                         />
                     </div>
 
                     <button type="submit" className={styles.button} disabled={isLoading}>
-                        {isLoading ? 'Registrando...' : 'Registrarse'}
+                        {isLoading ? 'Creando cuenta...' : 'Registrarme'}
                     </button>
                 </form>
 
-                <div style={{ marginTop: '1.5rem', textAlign: 'center', color: '#4b5563' }}>
-                    ¿Ya tienes cuenta?{' '}
-                    <Link to="/login" style={{ color: '#4f46e5', fontWeight: 600, textDecoration: 'none' }}>
+                <div className={styles.footer}>
+                    ¿Ya tienes una cuenta?{' '}
+                    <Link to="/login" className={styles.link}>
                         Inicia Sesión
                     </Link>
                 </div>

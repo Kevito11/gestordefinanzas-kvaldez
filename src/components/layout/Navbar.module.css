@@ -53,15 +53,18 @@
 
 .dropdownMenu {
   position: absolute;
-  top: 120%;
+  top: 130%;
   right: 0;
-  background: white;
-  border-radius: 0;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  min-width: 220px;
-  padding: 0.5rem;
-  border: 1px solid #f3f4f6;
-  animation: slideDown 0.2s ease-out;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  min-width: 250px;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  animation: expandCard 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top right;
+  z-index: 1001;
 }
 
 .item {
@@ -89,14 +92,39 @@
   font-size: 1.2rem;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
+@media (max-width: 600px) {
+  .navbar {
+    padding: 0.75rem 1rem;
+  }
+  
+  .title {
+    font-size: 1.1rem;
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  to {
+  .dropdownMenu {
+    min-width: 200px;
+    right: 0;
+    max-width: 90vw;
+  }
+  
+  .item {
+    padding: 1rem;
+    gap: 1rem;
+  }
+}
+
+@keyframes expandCard {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(-15px);
+  }
+
+  100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1) translateY(0);
   }
 }

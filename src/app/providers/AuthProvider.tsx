@@ -2,6 +2,8 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { AuthState, User } from '../../types/auth';
 
+import { storage } from '../../lib/storage';
+
 interface AuthContextValue extends AuthState {
   login: (user: User, token: string, expiresAt?: number) => void;
   logout: () => void;
@@ -9,26 +11,22 @@ interface AuthContextValue extends AuthState {
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
-const STORAGE_KEY = 'auth_data';
+const STORAGE_KEY = 'auth';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [auth, setAuth] = useState<AuthState>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = storage.get<AuthState>(STORAGE_KEY);
     if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch {
-        return { user: null, token: null, expiresAt: null };
-      }
+      return stored;
     }
-    return { user: null, token: null, expiresAt: null };
+    return { user: null, token: null, expiresAt: undefined };
   });
 
   useEffect(() => {
     if (auth.user && auth.token) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(auth));
+      storage.set(STORAGE_KEY, auth);
     } else {
-      localStorage.removeItem(STORAGE_KEY);
+      storage.remove(STORAGE_KEY);
     }
   }, [auth]);
 

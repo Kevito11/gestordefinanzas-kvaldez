@@ -1,15 +1,27 @@
 import { createBrowserRouter } from 'react-router-dom';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
-import BudgetCalculator from '../pages/BudgetCalculator';
-
+import PlanificadorMaestro from '../pages/PlanificadorMaestro';
+import ProtectedRoute from './providers/ProtectedRoute';
+import Dashboard from '../pages/Dashboard';
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <BudgetCalculator />,
+    element: <Dashboard />,
   },
-  // Keeping these routes just in case, but they are not the entry point anymore
+  {
+    path: '/plan-maestro',
+    element: <PlanificadorMaestro />,
+  },
+  {
+    path: '/transactions',
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
+  },
   {
     path: '/login',
     element: <Login />,

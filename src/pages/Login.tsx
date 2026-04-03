@@ -27,7 +27,7 @@ export default function Login() {
             login(user, token!, expiresAt);
             navigate(from, { replace: true });
         } catch (err: any) {
-            setError(err.message || 'Error al iniciar sesión');
+            setError(err.message || 'Credenciales inválidas. Por favor intente de nuevo.');
         } finally {
             setIsLoading(false);
         }
@@ -36,20 +36,22 @@ export default function Login() {
     return (
         <div className={styles.container}>
             <div className={styles.card}>
-                <h1 className={styles.title}>Iniciar Sesión</h1>
+                <h1 className={styles.title}>Cuentas Claras</h1>
+                <p className={styles.subtitle}>Tu gestor de finanzas personal e inteligente</p>
 
                 {error && <div className={styles.error}>{error}</div>}
 
                 <form onSubmit={handleSubmit} className={styles.form}>
                     <div className={styles.field}>
-                        <label htmlFor="username">Usuario</label>
+                        <label htmlFor="username">Nombre de Usuario</label>
                         <input
                             id="username"
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            placeholder="Ingresa tu usuario"
+                            placeholder="nombre@ejemplo.com"
                             required
+                            autoComplete="username"
                         />
                     </div>
 
@@ -60,21 +62,28 @@ export default function Login() {
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Ingresa tu contraseña"
+                            placeholder="••••••••"
                             required
+                            autoComplete="current-password"
                         />
                     </div>
 
                     <button type="submit" className={styles.button} disabled={isLoading}>
-                        {isLoading ? 'Cargando...' : 'Entrar'}
+                        {isLoading ? 'Verificando...' : 'Iniciar Sesión'}
                     </button>
                 </form>
 
-                <div style={{ marginTop: '1.5rem', textAlign: 'center', color: '#4b5563' }}>
-                    ¿No tienes cuenta?{' '}
-                    <Link to="/register" style={{ color: '#4f46e5', fontWeight: 600, textDecoration: 'none' }}>
-                        Regístrate aquí
+                <div className={styles.footer}>
+                    ¿Aún no tienes cuenta?{' '}
+                    <Link to="/register" className={styles.link}>
+                        Regístrate ahora
                     </Link>
+                    
+                    <div style={{ marginTop: '24px', borderTop: '1px solid #e5e7eb', paddingTop: '16px' }}>
+                        <Link to="/" className={styles.guestLink}>
+                           <span>🚀</span> Probar como Invitado (Sin guardar)
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>

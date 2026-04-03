@@ -1,4 +1,4 @@
-// src/pages/Home.tsx
+// src/pages/Dashboard.tsx
 import { useState, useEffect } from 'react';
 import { ModalProvider, useModal } from '../contexts/ModalContext';
 import AccountsModal from '../components/modals/AccountsModal';
@@ -12,10 +12,14 @@ import type { Account } from '@/types/account';
 import type { Transaction } from '@/types/transaction';
 import TransactionList from '../features/transactions/TransactionList';
 import BudgetList from '../features/budgets/BudgetList';
-import styles from './Home.module.css';
+import styles from './Dashboard.module.css';
 import Navbar from '../components/layout/Navbar';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../app/providers/AuthProvider';
 
-function HomeContent() {
+function DashboardContent() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const { activeModal, openModal, closeModal } = useModal();
   const [stats, setStats] = useState({
     accounts: 0,
@@ -74,35 +78,58 @@ function HomeContent() {
   return (
     <div className={styles.home}>
       <Navbar />
+      {!user && (
+        <div style={{
+          background: '#fee2e2',
+          padding: '10px',
+          textAlign: 'center',
+          color: '#991b1b',
+          fontWeight: 'bold',
+          fontSize: '0.9rem',
+          position: 'sticky',
+          top: '70px',
+          zIndex: 50,
+          borderBottom: '1px solid #fee2e2'
+        }}>
+           ⚠️ MODO INVITADO: Tus datos son temporales. <Link to="/login" style={{ color: '#b91c1c' }}>Regístrate aquí</Link> para guardar tus finanzas.
+        </div>
+      )}
       {/* Hero Section */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
           <h1 className={styles.heroTitle}>
-            Gestiona tus Finanzas de Manera Inteligente
+            Control Central: Tu Estrategia Financiera
           </h1>
           <p className={styles.heroSubtitle}>
-            Controla tus ingresos, gastos y presupuestos con herramientas poderosas y fáciles de usar.
+            Bienvenido a tu base de operaciones. Desde aquí supervisas tu progreso, tus transacciones y tu futuro económico.
           </p>
           <div className={styles.heroActions}>
-            <button
+            <Link
+              to="/plan-maestro"
               className={styles.primaryButton}
-              onClick={() => openModal('accounts')}
+              style={{ textDecoration: 'none' }}
             >
-              Comenzar Ahora
-            </button>
+              🚀 Mi Plan Maestro
+            </Link>
             <button
               className={styles.secondaryButton}
-              onClick={() => openModal('transactions')}
+              onClick={() => {
+                if (!user) {
+                  navigate('/plan-maestro');
+                } else {
+                  openModal('transactions');
+                }
+              }}
             >
-              Ver Transacciones
+              ➕ Registrar Gasto
             </button>
           </div>
         </div>
         <div className={styles.heroImage}>
           <div className={styles.floatingCard}>
-            <div className={styles.cardIcon}>📱</div>
-            <h3>Acceso Móvil</h3>
-            <p>Gestiona desde cualquier lugar</p>
+            <div className={styles.cardIcon}>📊</div>
+            <h3>Análisis Real</h3>
+            <p>Tus números, siempre al día</p>
           </div>
         </div>
       </section>
@@ -142,24 +169,25 @@ function HomeContent() {
       <section className={styles.budgets}>
         <div className={styles.sectionHeader}>
           <h2>Gastos Fijos</h2>
-          <p>Tus gastos recurrentes mensuales, quincenales y semanales</p>
+          <p>Tus pagos recurrentes mensuales, quincenales y semanales</p>
         </div>
         <BudgetList key={budgetsRefreshKey} />
       </section>
 
 
 
-      {/* CTA Section */}
+      {/* Plan Maestro Promo Section */}
       <section className={styles.cta}>
         <div className={styles.ctaContent}>
-          <h2>¿Listo para tomar control de tus finanzas?</h2>
-          <p>Únete a miles de usuarios que ya gestionan mejor su dinero</p>
-          <button
+          <h2>¿Tienes un Plan para tu Dinero?</h2>
+          <p>Usa nuestro Planificador Maestro para diseñar tu futuro y asegurarte de que cada peso tenga un propósito.</p>
+          <Link
+            to="/plan-maestro"
             className={styles.ctaButton}
-            onClick={() => openModal('accounts')}
+            style={{ textDecoration: 'none' }}
           >
-            Crear Cuenta Gratis
-          </button>
+            Ir al Planificador Maestro 🎯
+          </Link>
         </div>
       </section>
 
@@ -194,10 +222,10 @@ function HomeContent() {
   );
 }
 
-export default function Home() {
+export default function Dashboard() {
   return (
     <ModalProvider>
-      <HomeContent />
+      <DashboardContent />
     </ModalProvider>
   );
 }

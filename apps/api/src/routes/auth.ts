@@ -35,7 +35,7 @@ router.post('/register', async (req, res) => {
 
         const passwordHash = await bcrypt.hash(password, 10);
         const newUser: User = {
-            id: nanoid(),
+            id: nanoid(8),
             username,
             passwordHash,
             name

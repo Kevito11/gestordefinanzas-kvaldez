@@ -13,11 +13,11 @@ export default function BudgetList({ refreshKey }: { refreshKey?: number }) {
   }, [refreshKey]);
 
   if (loading) {
-    return <div className={styles.loading}>Cargando gastos fijos...</div>;
+    return <div className={styles.loading}>Cargando pagos fijos...</div>;
   }
 
   if (budgets.length === 0) {
-    return <div className={styles.empty}>No hay gastos fijos registrados.</div>;
+    return <div className={styles.empty}>No hay pagos fijos registrados.</div>;
   }
 
   return (

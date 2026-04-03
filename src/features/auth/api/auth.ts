@@ -1,6 +1,6 @@
 import type { AuthState } from '../../../types/auth';
 
-const API_URL = 'http://localhost:3001/api/auth';
+const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/auth`;
 
 export async function loginWithApi(credentials: { username: string; password: string }): Promise<AuthState> {
     const res = await fetch(`${API_URL}/login`, {
