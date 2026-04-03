@@ -3,7 +3,7 @@ import { ApiClient } from '@/lib/apiClient';
 import type { Account } from '@/types/account';
 import { storage } from '@/lib/storage';
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 const client = new ApiClient(BASE_URL, () => storage.get<{ token: string }>('auth')?.token ?? null);
 
 export const AccountsAPI = {

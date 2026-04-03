@@ -19,6 +19,6 @@ app.use('/api/accounts', accountsRouter);
 app.use('/api/budgets', budgetsRouter);
 app.use('/api/transactions', transactionsRouter);
 
-app.listen(PORT, () => {
-  console.log(`API server running on http://localhost:${PORT}`);
+app.listen(Number(PORT), '0.0.0.0', () => {
+  console.log(`API server running on http://0.0.0.0:${PORT}`);
 });
