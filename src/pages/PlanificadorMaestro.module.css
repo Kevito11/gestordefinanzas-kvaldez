@@ -136,10 +136,11 @@
   border-radius: 14px;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   min-width: 220px;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   padding: 6px;
+  z-index: 1000;
 }
 
 .dropdownItem {
@@ -164,6 +165,22 @@
   background: #f3f4f6;
   color: #4f46e5;
   padding-left: 20px;
+}
+
+.saveItem {
+  color: #4f46e5;
+  font-weight: 700;
+  background: rgba(79, 70, 229, 0.05);
+}
+
+.saveItem:hover {
+  background: rgba(79, 70, 229, 0.1);
+}
+
+.divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 4px 8px;
 }
 
 .actionBtn:hover {

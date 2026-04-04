@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import BudgetSection, { type BudgetItem } from '../components/budget/BudgetSection';
 import BudgetSummary from '../components/budget/BudgetSummary';
@@ -19,8 +19,74 @@ const PlanificadorMaestro: React.FC = () => {
     const [exchangeRate, setExchangeRate] = useState<number>(60.00); 
     const [isDataExchangeOpen, setIsDataExchangeOpen] = useState(false);
     const [actionsOpen, setActionsOpen] = useState(false);
+    const [saving, setSaving] = useState(false);
     const [actualSpentThisMonth, setActualSpentThisMonth] = useState(0);
     const { user } = useAuth();
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Guardar todos los cambios locales en la base de datos
+    const handleSavePlan = async () => {
+        if (!user) return;
+        setSaving(true);
+        setActionsOpen(false);
+
+        try {
+            // 1. Guardar Ingresos (Actualizar o Crear Cuentas)
+            for (const income of incomes) {
+                const accountData = { 
+                    name: income.name,
+                    salary: income.amount,
+                    extras: 0, 
+                    currency: income.itemCurrency || currency,
+                    salaryType: (income.periodicity === 'anual' ? 'monthly' : 'monthly') as any // Opcional: mejorar mapeo
+                };
+
+                if (income.id.length > 20) {
+                    await AccountsAPI.update(income.id, accountData);
+                } else {
+                    await AccountsAPI.create(accountData as any);
+                }
+            }
+
+            // 2. Guardar Gastos Fijos (Crear o Actualizar Budgets)
+            for (const expense of fixedExpenses) {
+                const budgetData = {
+                    name: expense.name,
+                    amount: expense.amount,
+                    currency: expense.itemCurrency,
+                    period: (expense.periodicity === 'anual' ? 'yearly' : 'monthly') as 'yearly' | 'monthly',
+                    payDay: expense.payDay
+                };
+
+                if (expense.id.length > 20) {
+                    // Actualizar existente
+                    await BudgetsAPI.update(expense.id, budgetData);
+                } else {
+                    // Crear nuevo (los de nanoid tienen id.length < 20)
+                    await BudgetsAPI.create(budgetData as any);
+                }
+            }
+
+            alert('✅ Planificación guardada exitosamente en la nube.');
+            window.location.reload(); // Recargar para obtener los nuevos IDs reales de DB
+        } catch (error) {
+            console.error('Error al guardar planificación:', error);
+            alert('❌ Error al guardar. Verifica tu conexión.');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // Cierre automático del menú desplegable al pulsar fuera
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setActionsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     useEffect(() => {
         fetch('https://api.exchangerate-api.com/v4/latest/USD')
@@ -224,7 +290,7 @@ const PlanificadorMaestro: React.FC = () => {
                     
                     <div className={styles.actionsArea}>
                         {user ? (
-                            <div className={styles.dropdownContainer}>
+                            <div className={styles.dropdownContainer} ref={dropdownRef}>
                                 <button 
                                     className={styles.dropdownToggle}
                                     onClick={() => setActionsOpen(!actionsOpen)}
@@ -234,6 +300,16 @@ const PlanificadorMaestro: React.FC = () => {
                                 
                                 {actionsOpen && (
                                     <div className={styles.dropdownMenu}>
+                                        <button 
+                                            onClick={handleSavePlan} 
+                                            className={`${styles.dropdownItem} ${styles.saveItem}`}
+                                            disabled={saving}
+                                        >
+                                            <span>💾</span> {saving ? 'Guardando...' : 'Guardar Planificación'}
+                                        </button>
+
+                                        <div className={styles.divider}></div>
+
                                         <Link to="/" className={styles.dropdownItem}>
                                             <span>🏠</span> Inicio
                                         </Link>
