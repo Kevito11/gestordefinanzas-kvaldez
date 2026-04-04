@@ -1,66 +1,55 @@
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { nanoid } from 'nanoid';
-import { readJson, writeJson } from '../db/fileDb';
-
+import { User } from '../models/User';
+import { Account } from '../models/Account';
+import { Transaction } from '../models/Transaction';
+import { Budget } from '../models/Budget';
 import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
-const SECRET_KEY = 'super-secret-key-change-me'; // In prod, use env var
-
-interface User {
-    id: string;
-    username: string;
-    passwordHash: string;
-    name: string;
-}
-
-// Helper to get users
-const getUsers = () => readJson<User[]>('users.json', []);
-const saveUsers = (users: User[]) => writeJson('users.json', users);
+const SECRET_KEY = process.env.JWT_SECRET || 'super-secret-key-change-me';
 
 router.post('/register', async (req, res) => {
     try {
         const { username, password, name } = req.body;
 
         if (!username || !password || !name) {
-            return res.status(400).json({ message: 'Missing required fields' });
+            return res.status(400).json({ message: 'Todos los campos son obligatorios' });
         }
 
-        const users = getUsers();
-        if (users.find(u => u.username === username)) {
-            return res.status(409).json({ message: 'Username already exists' });
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+            return res.status(409).json({ message: 'El nombre de usuario ya existe' });
         }
 
         const passwordHash = await bcrypt.hash(password, 10);
-        const newUser: User = {
-            id: nanoid(8),
+        const newUser = new User({
+            name,
             username,
-            passwordHash,
-            name
-        };
+            password: passwordHash
+        });
 
-        users.push(newUser);
-        saveUsers(users);
+        await newUser.save();
 
-        // Auto-login after register
         const token = jwt.sign(
-            { userId: newUser.id, username: newUser.username },
+            { userId: newUser._id, username: newUser.username },
             SECRET_KEY,
             { expiresIn: '1y' }
         );
 
-        const { passwordHash: _, ...userWithoutPass } = newUser;
-
         res.status(201).json({
-            user: userWithoutPass,
+            user: {
+                id: newUser._id,
+                username: newUser.username,
+                name: newUser.name
+            },
             token,
             expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 365
         });
     } catch (error) {
         console.error('Register error:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({ message: 'Error interno del servidor' });
     }
 });
 
@@ -69,32 +58,33 @@ router.post('/login', async (req, res) => {
         const { username, password } = req.body;
 
         if (!username || !password) {
-            return res.status(400).json({ message: 'Missing credentials' });
+            return res.status(400).json({ message: 'Credenciales incompletas' });
         }
 
-        const users = getUsers();
-        const user = users.find(u => u.username === username);
+        const user: any = await User.findOne({ username });
 
-        if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
-            return res.status(401).json({ message: 'Invalid credentials' });
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(401).json({ message: 'Credenciales inválidas' });
         }
 
         const token = jwt.sign(
-            { userId: user.id, username: user.username },
+            { userId: user._id, username: user.username },
             SECRET_KEY,
             { expiresIn: '1y' }
         );
 
-        const { passwordHash: _, ...userWithoutPass } = user;
-
         res.json({
-            user: userWithoutPass,
+            user: {
+                id: user._id,
+                username: user.username,
+                name: user.name
+            },
             token,
             expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 365
         });
     } catch (error) {
         console.error('Login error:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({ message: 'Error interno del servidor' });
     }
 });
 
@@ -103,39 +93,36 @@ router.put('/change-password', authenticateToken, async (req: any, res) => {
         const { currentPassword, newPassword } = req.body;
         const userId = req.user.userId;
 
-        const users = getUsers();
-        const userIndex = users.findIndex(u => u.id === userId);
+        const user: any = await User.findById(userId);
 
-        if (userIndex === -1) {
-            return res.status(404).json({ message: 'User not found' });
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
-        const user = users[userIndex];
-
-        if (!(await bcrypt.compare(currentPassword, user.passwordHash))) {
-            return res.status(401).json({ message: 'Invalid current password' });
+        if (!(await bcrypt.compare(currentPassword, user.password))) {
+            return res.status(401).json({ message: 'Contraseña actual incorrecta' });
         }
 
         const newHash = await bcrypt.hash(newPassword, 10);
-        users[userIndex] = { ...user, passwordHash: newHash };
-        saveUsers(users);
+        user.password = newHash;
+        await user.save();
 
-        res.json({ message: 'Password updated successfully' });
+        res.json({ message: 'Contraseña actualizada con éxito' });
 
     } catch (error) {
         console.error('Change password error:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({ message: 'Error interno del servidor' });
     }
 });
 
-router.get('/export-data', authenticateToken, async (_req, res) => {
+router.get('/export-data', authenticateToken, async (req: any, res) => {
     try {
-        // In a real app we'd filter by userId, but for now we read the global files
-        // OR filtering by DEFAULT_USER_ID if we stick to that pattern, 
-        // but let's just dump the files for simplicity as per request context
-        const accounts = readJson('accounts.json', []);
-        const transactions = readJson('transactions.json', []);
-        const budgets = readJson('budgets.json', []);
+        const userId = req.user.userId;
+
+        // Fetch all data for the user
+        const accounts = await Account.find({ userId });
+        const transactions = await Transaction.find({ userId });
+        const budgets = await Budget.find({ userId });
 
         res.json({
             accounts,
@@ -144,7 +131,7 @@ router.get('/export-data', authenticateToken, async (_req, res) => {
         });
     } catch (error) {
         console.error('Export error:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({ message: 'Error al exportar datos' });
     }
 });
 
