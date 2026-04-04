@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import BudgetSection, { type BudgetItem } from '../components/budget/BudgetSection';
 import BudgetSummary from '../components/budget/BudgetSummary';
 import DataExchangeModal from '../components/modals/DataExchangeModal';
@@ -298,38 +299,47 @@ const PlanificadorMaestro: React.FC = () => {
                                     <span>⚙️</span> Acciones Rápidas
                                 </button>
                                 
-                                {actionsOpen && (
-                                    <div className={styles.dropdownMenu}>
-                                        <button 
-                                            onClick={handleSavePlan} 
-                                            className={`${styles.dropdownItem} ${styles.saveItem}`}
-                                            disabled={saving}
+                                <AnimatePresence>
+                                    {actionsOpen && (
+                                        <motion.div 
+                                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                            transition={{ duration: 0.2, ease: "easeOut" }}
+                                            className={styles.dropdownMenu}
+                                            style={{ transformOrigin: 'top right' }}
                                         >
-                                            <span>💾</span> {saving ? 'Guardando...' : 'Guardar Planificación'}
-                                        </button>
+                                            <button 
+                                                onClick={handleSavePlan} 
+                                                className={`${styles.dropdownItem} ${styles.saveItem}`}
+                                                disabled={saving}
+                                            >
+                                                <span>💾</span> {saving ? 'Guardando...' : 'Guardar Planificación'}
+                                            </button>
 
-                                        <div className={styles.divider}></div>
+                                            <div className={styles.divider}></div>
 
-                                        <Link to="/" className={styles.dropdownItem}>
-                                            <span>🏠</span> Inicio
-                                        </Link>
-                                        <Link to="/transactions" className={styles.dropdownItem}>
-                                            <span>💸</span> Historial
-                                        </Link>
-                                        <button onClick={() => {
-                                            handleClearAll();
-                                            setActionsOpen(false);
-                                        }} className={styles.dropdownItem}>
-                                            <span>🗑️</span> Borrar todo
-                                        </button>
-                                        <button onClick={() => {
-                                            setIsDataExchangeOpen(true);
-                                            setActionsOpen(false);
-                                        }} className={styles.dropdownItem}>
-                                            <span>🗂️</span> Importar/Exportar
-                                        </button>
-                                    </div>
-                                )}
+                                            <Link to="/" className={styles.dropdownItem}>
+                                                <span>🏠</span> Inicio
+                                            </Link>
+                                            <Link to="/transactions" className={styles.dropdownItem}>
+                                                <span>💸</span> Historial
+                                            </Link>
+                                            <button onClick={() => {
+                                                handleClearAll();
+                                                setActionsOpen(false);
+                                            }} className={styles.dropdownItem}>
+                                                <span>🗑️</span> Borrar todo
+                                            </button>
+                                            <button onClick={() => {
+                                                setIsDataExchangeOpen(true);
+                                                setActionsOpen(false);
+                                            }} className={styles.dropdownItem}>
+                                                <span>🗂️</span> Importar/Exportar
+                                            </button>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         ) : (
                             <Link to="/login" className={`${styles.actionBtn} ${styles.loginBtn}`}>

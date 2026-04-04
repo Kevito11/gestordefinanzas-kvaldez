@@ -13,6 +13,8 @@
   align-items: center;
   gap: 20px;
   text-align: center;
+  position: relative;
+  z-index: 150;
 }
 
 .headerTitle h1 {
