@@ -25,21 +25,36 @@ const PlanificadorMaestro: React.FC = () => {
     const { user } = useAuth();
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    // Guardar todos los cambios locales en la base de datos
+    // Guardar todos los cambios locales en la base de datos (Sincronización total)
     const handleSavePlan = async () => {
         if (!user) return;
         setSaving(true);
         setActionsOpen(false);
 
         try {
-            // 1. Guardar Ingresos (Actualizar o Crear Cuentas)
+            // 0. Obtener estado actual de la DB para detectar borrados
+            const [dbAccounts, dbBudgets] = await Promise.all([
+                AccountsAPI.list(),
+                BudgetsAPI.list()
+            ]);
+
+            // 1. Sincronizar Ingresos (Cuentas)
+            // Identificar qué cuentas de la base de datos ya no están en la UI para borrarlas
+            const incomeIdsInUI = new Set(incomes.map(i => i.id));
+            for (const dbAcc of dbAccounts) {
+                if (!incomeIdsInUI.has(dbAcc.id)) {
+                    await AccountsAPI.delete(dbAcc.id);
+                }
+            }
+
+            // Crear o actualizar las cuentas actuales
             for (const income of incomes) {
                 const accountData = { 
                     name: income.name,
                     salary: income.amount,
                     extras: 0, 
                     currency: income.itemCurrency || currency,
-                    salaryType: (income.periodicity === 'anual' ? 'monthly' : 'monthly') as any // Opcional: mejorar mapeo
+                    salaryType: (income.periodicity === 'anual' ? 'monthly' : 'monthly') as any
                 };
 
                 if (income.id.length > 20) {
@@ -49,7 +64,16 @@ const PlanificadorMaestro: React.FC = () => {
                 }
             }
 
-            // 2. Guardar Gastos Fijos (Crear o Actualizar Budgets)
+            // 2. Sincronizar Gastos Fijos (Presupuestos)
+            // Identificar presupuestos que ya no están en la UI para borrarlos
+            const expenseIdsInUI = new Set(fixedExpenses.map(e => e.id));
+            for (const dbBud of dbBudgets) {
+                if (!expenseIdsInUI.has(dbBud.id)) {
+                    await BudgetsAPI.delete(dbBud.id);
+                }
+            }
+
+            // Crear o actualizar los presupuestos actuales
             for (const expense of fixedExpenses) {
                 const budgetData = {
                     name: expense.name,
@@ -60,19 +84,17 @@ const PlanificadorMaestro: React.FC = () => {
                 };
 
                 if (expense.id.length > 20) {
-                    // Actualizar existente
                     await BudgetsAPI.update(expense.id, budgetData);
                 } else {
-                    // Crear nuevo (los de nanoid tienen id.length < 20)
                     await BudgetsAPI.create(budgetData as any);
                 }
             }
 
-            alert('✅ Planificación guardada exitosamente en la nube.');
-            window.location.reload(); // Recargar para obtener los nuevos IDs reales de DB
+            alert('✅ Planificación sincronizada exitosamente en la nube.');
+            window.location.reload(); 
         } catch (error) {
-            console.error('Error al guardar planificación:', error);
-            alert('❌ Error al guardar. Verifica tu conexión.');
+            console.error('Error al sincronizar planificación:', error);
+            alert('❌ Error al sincronizar. Verifica tu conexión.');
         } finally {
             setSaving(false);
         }
