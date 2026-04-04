@@ -24,6 +24,7 @@ router.post('/', async (req: any, res) => {
       salaryType: req.body.salaryType ?? 'monthly',
       salary: Number(req.body.salary),
       extras: req.body.extras ? Number(req.body.extras) : 0,
+      isActive: req.body.isActive !== undefined ? req.body.isActive : true,
       userId: req.user.userId,
     });
     await account.save();
@@ -35,9 +36,13 @@ router.post('/', async (req: any, res) => {
 
 router.put('/:id', async (req: any, res) => {
   try {
+    const updateData = { ...req.body };
+    if (updateData.salary) updateData.salary = Number(updateData.salary);
+    if (updateData.extras) updateData.extras = Number(updateData.extras);
+
     const account = await Account.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.userId },
-      { ...req.body, updatedAt: new Date() },
+      { ...updateData, updatedAt: new Date() },
       { new: true }
     );
     if (!account) return res.status(404).json({ error: 'Not found' });

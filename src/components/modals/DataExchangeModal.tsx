@@ -66,37 +66,39 @@ export default function DataExchangeModal({ isOpen, onClose }: DataExchangeModal
             setLoading(true);
             const payload = await parseFileData(file);
 
-            // Borrado total previo a la importación
+            // Borrado total previo a la importación (Secuencialmente para evitar 403)
             const [oldAccounts, oldBudgets, oldTransactions] = await Promise.all([
                 AccountsAPI.list(),
                 BudgetsAPI.list(),
                 TransactionsAPI.list()
             ]);
 
-            const deletePromises: Promise<any>[] = [];
-            oldAccounts.forEach(a => deletePromises.push(AccountsAPI.delete(a.id)));
-            oldBudgets.forEach(b => deletePromises.push(BudgetsAPI.delete(b.id)));
-            oldTransactions.forEach(t => deletePromises.push(TransactionsAPI.delete(t.id)));
-
-            await Promise.all(deletePromises);
-
+            for (const a of oldAccounts) await AccountsAPI.delete(a.id);
+            for (const b of oldBudgets) await BudgetsAPI.delete(b.id);
+            for (const t of oldTransactions) await TransactionsAPI.delete(t.id);
             
             let importCount = 0;
 
             if (payload.transactions.length > 0) {
-                await Promise.all(payload.transactions.map(item => TransactionsAPI.create(item)));
-                importCount += payload.transactions.length;
+                for (const item of payload.transactions) {
+                    await TransactionsAPI.create(item);
+                    importCount++;
+                }
             }
             if (payload.accounts.length > 0) {
-                await Promise.all(payload.accounts.map(item => AccountsAPI.create(item)));
-                importCount += payload.accounts.length;
+                for (const item of payload.accounts) {
+                    await AccountsAPI.create(item);
+                    importCount++;
+                }
             }
             if (payload.budgets.length > 0) {
-                await Promise.all(payload.budgets.map(item => BudgetsAPI.create({
-                    ...item,
-                    amount: Number(item.amount || 0)
-                })));
-                importCount += payload.budgets.length;
+                for (const item of payload.budgets) {
+                    await BudgetsAPI.create({
+                        ...item,
+                        amount: Number(item.amount || 0)
+                    });
+                    importCount++;
+                }
             }
 
             if (importCount === 0) {
