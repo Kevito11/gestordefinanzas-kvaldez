@@ -19,7 +19,7 @@ interface BudgetSectionProps {
     suggestedCategories?: string[];
     currency: 'USD' | 'DOP';
     exchangeRate?: number;
-    timeframe?: 'mensual' | 'quincenal' | 'puntual';
+    timeframe?: 'mensual' | 'quincenal' | 'puntual' | 'original';
     onChange: (items: BudgetItem[]) => void;
 }
 
@@ -29,13 +29,14 @@ const BudgetSection: React.FC<BudgetSectionProps> = ({
     suggestedCategories = [],
     currency,
     exchangeRate = 1,
+    timeframe = 'mensual',
     onChange,
 }) => {
     const [isOpen, setIsOpen] = useState(true);
     const [showAddPanel, setShowAddPanel] = useState(false);
     const [newCategorySelection, setNewCategorySelection] = useState('');
 
-    const calculateMonthlyTotal = (item: BudgetItem) => {
+    const calculateDisplayTotal = (item: BudgetItem) => {
         let baseAmount = item.amount;
 
         const itemCurr = item.itemCurrency || currency;
@@ -44,6 +45,9 @@ const BudgetSection: React.FC<BudgetSectionProps> = ({
         } else if (itemCurr === 'DOP' && currency === 'USD') {
             baseAmount = exchangeRate > 0 ? baseAmount / exchangeRate : baseAmount;
         }
+
+        // Si es original, no aplicamos multiplicadores de periodicidad
+        if (timeframe === 'original') return baseAmount;
 
         switch (item.periodicity) {
             case 'mensual': return baseAmount;
@@ -58,10 +62,9 @@ const BudgetSection: React.FC<BudgetSectionProps> = ({
 
     const sectionTotal = useMemo(() => {
         return items.reduce((acc, curr) => {
-            // Pass the whole item now
-            return acc + calculateMonthlyTotal(curr);
+            return acc + calculateDisplayTotal(curr);
         }, 0);
-    }, [items]);
+    }, [items, timeframe, currency, exchangeRate]);
 
     const formatCurrency = (amount: number) => {
         const locale = currency === 'USD' ? 'en-US' : 'es-DO';

@@ -9,7 +9,7 @@ interface BudgetSummaryProps {
     totalSavings: number; 
     currency: 'USD' | 'DOP';
     exchangeRate?: number;
-    timeframe: 'mensual' | 'quincenal' | 'puntual';
+    timeframe: 'mensual' | 'quincenal' | 'puntual' | 'original';
     budgetItems?: any[]; 
 }
 
@@ -48,7 +48,9 @@ const BudgetSummary: React.FC<BudgetSummaryProps> = ({
     return (
         <div className={styles.section} style={{ background: '#f8f9fa', border: '1px solid #e9ecef' }}>
             <div className={styles.header}>
-                <h3 className={styles.title}>Resumen del Presupuesto (Mensual)</h3>
+                <h3 className={styles.title}>
+                    Resumen {timeframe === 'original' ? 'de Datos Reales' : `del Presupuesto (${timeframe.charAt(0).toUpperCase() + timeframe.slice(1)})`}
+                </h3>
             </div>
             {!user && (
                 <div style={{

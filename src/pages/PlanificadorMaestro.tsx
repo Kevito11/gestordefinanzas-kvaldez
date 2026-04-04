@@ -16,7 +16,7 @@ const PlanificadorMaestro: React.FC = () => {
     const [variableExpenses, setVariableExpenses] = useState<BudgetItem[]>([]);
     const [savings, setSavings] = useState<BudgetItem[]>([]);
     const [currency, setCurrency] = useState<'USD' | 'DOP'>('DOP');
-    const [timeframe, setTimeframe] = useState<'mensual' | 'quincenal' | 'puntual'>('mensual');
+    const [timeframe, setTimeframe] = useState<'mensual' | 'quincenal' | 'puntual' | 'original'>('mensual');
     const [exchangeRate, setExchangeRate] = useState<number>(60.00); 
     const [isDataExchangeOpen, setIsDataExchangeOpen] = useState(false);
     const [actionsOpen, setActionsOpen] = useState(false);
@@ -239,6 +239,11 @@ const PlanificadorMaestro: React.FC = () => {
 
             if (timeframe === 'puntual') return acc + baseAmount;
 
+            // Si es 'original', ignoramos la periodicidad y sumamos el monto base (ya convertido a la moneda seleccionada)
+            if (timeframe === 'original') {
+                return acc + baseAmount;
+            }
+
             let multiplier = 1; 
             switch (curr.periodicity) {
                 case 'mensual': multiplier = 1; break;
@@ -283,8 +288,9 @@ const PlanificadorMaestro: React.FC = () => {
                     <div className={styles.controlGroup}>
                         <label>Resumen:</label>
                         <select className={styles.select} value={timeframe} onChange={(e) => setTimeframe(e.target.value as any)}>
-                            <option value="mensual">Mensual</option>
-                            <option value="quincenal">Quincenal</option>
+                            <option value="mensual">Vista Mensual</option>
+                            <option value="quincenal">Vista Quincenal</option>
+                            <option value="original">Sin Conversión (Original)</option>
                             <option value="puntual">Puntual (Ahora)</option>
                         </select>
                     </div>
