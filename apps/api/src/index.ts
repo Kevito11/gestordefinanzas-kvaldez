@@ -1,15 +1,14 @@
-// apps/api/src/index.ts
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 
 import accountsRouter from './routes/accounts';
 import budgetsRouter from './routes/budgets';
 import transactionsRouter from './routes/transactions';
 import authRouter from './routes/auth';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;

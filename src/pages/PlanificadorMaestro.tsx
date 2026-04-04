@@ -294,7 +294,12 @@ const PlanificadorMaestro: React.FC = () => {
         <div className={styles.container}>
             <header className={styles.header}>
                 <div className={styles.headerTitle}>
-                    <h1>Planificador Maestro</h1>
+                    <div className={styles.titleWithAction}>
+                        <h1>Planificador Maestro</h1>
+                        <Link to="/" className={styles.backHomeBtn}>
+                             🏠 Volver al Inicio
+                        </Link>
+                    </div>
                     <p>Diseña tu estrategia financiera. Define tus ingresos y planea tus gastos con precisión.</p>
                 </div>
 
