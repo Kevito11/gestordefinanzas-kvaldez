@@ -94,13 +94,77 @@
   transition: all 0.2s;
   border: none;
   cursor: pointer;
+  background: #4f46e5;
+  color: white;
 }
 
-.homeBtn { background: #374151; color: white; }
-.historyBtn { background: #10b981; color: white; }
-.clearBtn { background: #ef4444; color: white; }
-.exchangeBtn { background: #6366f1; color: white; }
-.loginBtn { background: #4f46e5; color: white; }
+.dropdownContainer {
+  position: relative;
+  z-index: 100;
+}
+
+.dropdownToggle {
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+}
+
+.dropdownToggle:hover {
+  transform: translateY(-1px);
+  filter: brightness(110%);
+  box-shadow: 0 6px 12px -2px rgba(79, 70, 229, 0.3);
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  min-width: 220px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+}
+
+.dropdownItem {
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.15s;
+}
+
+.dropdownItem:hover {
+  background: #f3f4f6;
+  color: #4f46e5;
+  padding-left: 20px;
+}
 
 .actionBtn:hover {
   transform: translateY(-1px);
@@ -173,9 +237,28 @@
 
   .actionsArea {
     width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .dropdownContainer {
+    width: 100%;
+  }
+
+  .dropdownToggle {
+    width: 100%;
+    justify-content: center;
+    padding: 14px;
+  }
+
+  .dropdownMenu {
+    position: fixed;
+    top: auto;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    width: auto;
+    z-index: 1000;
   }
 
   .actionBtn {

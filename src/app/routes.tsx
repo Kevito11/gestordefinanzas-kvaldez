@@ -4,30 +4,31 @@ import Register from '../pages/Register';
 import PlanificadorMaestro from '../pages/PlanificadorMaestro';
 import ProtectedRoute from './providers/ProtectedRoute';
 import Dashboard from '../pages/Dashboard';
+import AnimatedLayout from '../components/layout/AnimatedLayout';
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Dashboard />,
+    element: <AnimatedLayout><Dashboard /></AnimatedLayout>,
   },
   {
     path: '/plan-maestro',
-    element: <PlanificadorMaestro />,
+    element: <AnimatedLayout><PlanificadorMaestro /></AnimatedLayout>,
   },
   {
     path: '/transactions',
     element: (
       <ProtectedRoute>
-        <Dashboard />
+        <AnimatedLayout><Dashboard /></AnimatedLayout>
       </ProtectedRoute>
     ),
   },
   {
     path: '/login',
-    element: <Login />,
+    element: <AnimatedLayout><Login /></AnimatedLayout>,
   },
   {
     path: '/register',
-    element: <Register />,
+    element: <AnimatedLayout><Register /></AnimatedLayout>,
   },
 ]);

@@ -109,6 +109,72 @@
   animation: slideInUp 0.5s ease-out;
 }
 
+.switchContainer {
+  background: white;
+  padding: 1.25rem;
+  border-radius: 14px;
+  margin-bottom: 2rem;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.switchLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.95rem;
+  user-select: none;
+}
+
+.switchLabel input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.slider {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  background-color: #d1d5db;
+  border-radius: 34px;
+  transition: .3s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: .3s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.switchLabel input:checked + .slider {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.switchLabel input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+.switchHelp {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+  line-height: 1.4;
+  font-weight: 400;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .form {

@@ -18,6 +18,7 @@ const PlanificadorMaestro: React.FC = () => {
     const [timeframe, setTimeframe] = useState<'mensual' | 'quincenal' | 'puntual'>('mensual');
     const [exchangeRate, setExchangeRate] = useState<number>(60.00); 
     const [isDataExchangeOpen, setIsDataExchangeOpen] = useState(false);
+    const [actionsOpen, setActionsOpen] = useState(false);
     const [actualSpentThisMonth, setActualSpentThisMonth] = useState(0);
     const { user } = useAuth();
 
@@ -46,7 +47,8 @@ const PlanificadorMaestro: React.FC = () => {
                 };
 
                 if (accounts.length > 0) {
-                    setIncomes(accounts.map(a => ({
+                    const activeAccounts = accounts.filter((a: any) => a.isActive !== false);
+                    setIncomes(activeAccounts.map((a: any) => ({
                         id: a.id,
                         name: a.name,
                         amount: Number(a.salary) + Number(a.extras || 0),
@@ -222,20 +224,37 @@ const PlanificadorMaestro: React.FC = () => {
                     
                     <div className={styles.actionsArea}>
                         {user ? (
-                            <>
-                                <Link to="/" className={`${styles.actionBtn} ${styles.homeBtn}`}>
-                                    <span>🏠</span> Inicio
-                                </Link>
-                                <Link to="/transactions" className={`${styles.actionBtn} ${styles.historyBtn}`}>
-                                    <span>💸</span> Historial
-                                </Link>
-                                <button onClick={handleClearAll} className={`${styles.actionBtn} ${styles.clearBtn}`}>
-                                    <span>🗑️</span> Borrar todo
+                            <div className={styles.dropdownContainer}>
+                                <button 
+                                    className={styles.dropdownToggle}
+                                    onClick={() => setActionsOpen(!actionsOpen)}
+                                >
+                                    <span>⚙️</span> Acciones Rápidas
                                 </button>
-                                <button onClick={() => setIsDataExchangeOpen(true)} className={`${styles.actionBtn} ${styles.exchangeBtn}`}>
-                                    <span>🗂️</span> Importar y exportar datos
-                                </button>
-                            </>
+                                
+                                {actionsOpen && (
+                                    <div className={styles.dropdownMenu}>
+                                        <Link to="/" className={styles.dropdownItem}>
+                                            <span>🏠</span> Inicio
+                                        </Link>
+                                        <Link to="/transactions" className={styles.dropdownItem}>
+                                            <span>💸</span> Historial
+                                        </Link>
+                                        <button onClick={() => {
+                                            handleClearAll();
+                                            setActionsOpen(false);
+                                        }} className={styles.dropdownItem}>
+                                            <span>🗑️</span> Borrar todo
+                                        </button>
+                                        <button onClick={() => {
+                                            setIsDataExchangeOpen(true);
+                                            setActionsOpen(false);
+                                        }} className={styles.dropdownItem}>
+                                            <span>🗂️</span> Importar/Exportar
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         ) : (
                             <Link to="/login" className={`${styles.actionBtn} ${styles.loginBtn}`}>
                                 Iniciar Sesión para Guardar

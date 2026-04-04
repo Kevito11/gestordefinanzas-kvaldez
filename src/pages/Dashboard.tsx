@@ -45,7 +45,9 @@ function DashboardContent() {
           BudgetsAPI.list()
         ]);
 
-        const totalBalance = accounts.reduce((sum: number, account: Account) => sum + account.salary + (account.extras || 0), 0);
+        const activeAccounts = accounts.filter((a: Account) => a.isActive !== false);
+
+        const totalBalance = activeAccounts.reduce((sum: number, account: Account) => sum + account.salary + (account.extras || 0), 0);
         const totalIncome = transactions
           .filter((t: Transaction) => t.type === 'income')
           .reduce((sum: number, t: Transaction) => sum + t.amount, 0);

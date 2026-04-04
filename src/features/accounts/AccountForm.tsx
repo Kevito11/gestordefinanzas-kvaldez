@@ -19,6 +19,7 @@ export default function AccountForm({
     salaryType: 'monthly' as SalaryType,
     salary: 0,
     extras: 0,
+    isActive: true,
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,6 +33,7 @@ export default function AccountForm({
         salaryType: account.salaryType,
         salary: account.salary,
         extras: account.extras || 0,
+        isActive: account.isActive ?? true,
       });
     } else {
       // Resetear formulario si no hay cuenta
@@ -41,6 +43,7 @@ export default function AccountForm({
         salaryType: 'monthly' as SalaryType,
         salary: 0,
         extras: 0,
+        isActive: true,
       });
     }
   }, [account]);
@@ -61,7 +64,7 @@ export default function AccountForm({
       }
       // Resetear formulario solo si no estamos editando
       if (!account) {
-        setForm({ ...form, name: '', salary: 0, extras: 0 });
+        setForm({ ...form, name: '', salary: 0, extras: 0, isActive: true });
       }
     } catch (err) {
       console.error('Error saving account:', err);
@@ -75,6 +78,22 @@ export default function AccountForm({
     <form onSubmit={submit} className={styles.form}>
       <h3>{account ? 'Editar Fuente de Ingreso' : 'Nueva Fuente de Ingreso'}</h3>
       {error && <div className={styles.error}>{error}</div>}
+      
+      <div className={styles.switchContainer}>
+        <label className={styles.switchLabel}>
+          <input
+            type="checkbox"
+            checked={form.isActive}
+            onChange={e => setForm({ ...form, isActive: e.target.checked })}
+          />
+          <span className={styles.slider}></span>
+          Incluir esta cuenta en el resumen
+        </label>
+        <p className={styles.switchHelp}>
+          Si desactivas esta opción, los montos de esta cuenta no se sumarán a tus totales.
+        </p>
+      </div>
+
       <label className={styles.label}>
         Nombre de la Fuente
         <input

@@ -8,6 +8,7 @@ export interface Account {
   salaryType: SalaryType; // Tipo de salario/ingreso
   salary: number; // Monto del salario/ingreso principal
   extras?: number; // Ingresos adicionales
+  isActive?: boolean; // Habilitado para cálculos
   userId?: string;
   createdAt: string;
   updatedAt?: string;

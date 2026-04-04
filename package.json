@@ -21,6 +21,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.4.0",
     "express": "^5.2.1",
+    "framer-motion": "^12.38.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.4.1",
     "nanoid": "^5.1.6",
