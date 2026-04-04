@@ -1,7 +1,10 @@
 import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
-const SECRET_KEY = 'super-secret-key-change-me';
+dotenv.config();
+
+const SECRET_KEY = process.env.JWT_SECRET || 'super-secret-key-change-me';
 
 export interface AuthRequest extends Request {
     user?: {

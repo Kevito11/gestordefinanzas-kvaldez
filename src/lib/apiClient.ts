@@ -29,8 +29,8 @@ export class ApiClient {
       let errorMessage = `API error ${res.status}`;
       try {
         const data = JSON.parse(text);
-        if (data && data.error) {
-          errorMessage = data.error;
+        if (data) {
+          errorMessage = data.error || data.message || errorMessage;
         }
       } catch (e) {
         errorMessage += `: ${text}`;
