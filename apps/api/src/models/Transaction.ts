@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const transactionSchema = new mongoose.Schema({
   accountId: { type: mongoose.Schema.Types.ObjectId, ref: 'Account', required: true },
-  type: { type: String, enum: ['income', 'expense', 'transfer'], required: true },
+  type: { type: String, enum: ['income', 'expense', 'transfer', 'savings'], required: true },
   amount: { type: Number, required: true },
   currency: { type: String, required: true },
   category: { type: String, required: true },
@@ -10,6 +10,9 @@ const transactionSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now },
   counterpartAccountId: { type: mongoose.Schema.Types.ObjectId, ref: 'Account' },
   tags: [String],
+  payDay: { type: Number },
+  periodicity: { type: String, enum: ['monthly', 'weekly', 'biweekly', 'yearly', 'daily', 'one-time'], default: 'one-time' },
+  isExecuted: { type: Boolean, default: false },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 }, { timestamps: true });
 

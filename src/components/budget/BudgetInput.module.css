@@ -206,3 +206,40 @@
     background-color: #fff5f5 !important;
     border-left: 4px solid #e74c3c !important;
 }
+
+.checkboxContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    padding-left: 4px;
+}
+
+.checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+    border-radius: 4px;
+    transition: transform 0.2s;
+}
+
+.checkbox:hover {
+    transform: scale(1.1);
+}
+
+.executed {
+    opacity: 0.6;
+    background-color: #f1f5f9 !important;
+}
+
+.executed .label, 
+.executed .amountInput,
+.executed .nameInput {
+    text-decoration: line-through;
+    color: #94a3b8 !important;
+}
+
+.executed .payDayContainer {
+    background: #e2e8f0;
+}

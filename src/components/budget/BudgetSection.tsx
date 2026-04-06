@@ -11,6 +11,7 @@ export interface BudgetItem {
     isCustom?: boolean;
     itemCurrency?: 'USD' | 'DOP';
     payDay?: number;
+    isExecuted?: boolean;
 }
 
 interface BudgetSectionProps {
@@ -46,8 +47,8 @@ const BudgetSection: React.FC<BudgetSectionProps> = ({
             baseAmount = exchangeRate > 0 ? baseAmount / exchangeRate : baseAmount;
         }
 
-        // Si es original, no aplicamos multiplicadores de periodicidad
-        if (timeframe === 'original') return baseAmount;
+        // Si es original o puntual, no aplicamos multiplicadores de periodicidad
+        if (timeframe === 'original' || timeframe === 'puntual') return baseAmount;
 
         switch (item.periodicity) {
             case 'mensual': return baseAmount;
@@ -55,7 +56,7 @@ const BudgetSection: React.FC<BudgetSectionProps> = ({
             case 'anual': return baseAmount / 12;
             case 'trimestral': return baseAmount / 3;
             case 'semestral': return baseAmount / 6;
-            case 'puntual': return baseAmount / 12;
+            case 'puntual': return baseAmount;
             default: return baseAmount;
         }
     };
@@ -189,12 +190,14 @@ const BudgetSection: React.FC<BudgetSectionProps> = ({
                                     periodicity={item.periodicity}
                                     itemCurrency={item.itemCurrency || currency}
                                     payDay={item.payDay}
+                                    isExecuted={item.isExecuted}
                                     isCustom={item.isCustom}
                                     onNameChange={item.isCustom ? (val) => handleItemChange(item.id, 'name', val) : undefined}
                                     onAmountChange={(val: number) => handleItemChange(item.id, 'amount', val)}
                                     onPeriodicityChange={(val: Periodicity) => handleItemChange(item.id, 'periodicity', val)}
                                     onItemCurrencyChange={(val: 'USD' | 'DOP') => handleItemChange(item.id, 'itemCurrency', val)}
                                     onPayDayChange={(val: number | undefined) => handleItemChange(item.id, 'payDay', val)}
+                                    onIsExecutedChange={(val: boolean) => handleItemChange(item.id, 'isExecuted', val)}
                                     onDelete={() => handleDelete(item.id)}
                                 />
                             ))}

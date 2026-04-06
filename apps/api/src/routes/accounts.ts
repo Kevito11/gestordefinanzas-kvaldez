@@ -25,12 +25,15 @@ router.post('/', async (req: any, res) => {
       salary: Number(req.body.salary),
       extras: req.body.extras ? Number(req.body.extras) : 0,
       isActive: req.body.isActive !== undefined ? req.body.isActive : true,
+      payDay: req.body.payDay ? Number(req.body.payDay) : undefined,
+      isExecuted: req.body.isExecuted !== undefined ? req.body.isExecuted : false,
       userId: req.user.userId,
     });
     await account.save();
     res.status(201).json(account);
   } catch (error) {
-    res.status(500).json({ error: 'Error creating account' });
+    console.error("Error creating account:", error);
+    res.status(500).json({ error: 'Error creating account', details: error });
   }
 });
 
@@ -48,7 +51,8 @@ router.put('/:id', async (req: any, res) => {
     if (!account) return res.status(404).json({ error: 'Not found' });
     res.json(account);
   } catch (error) {
-    res.status(500).json({ error: 'Error updating account' });
+    console.error("Error updating account:", error);
+    res.status(500).json({ error: 'Error updating account', details: error });
   }
 });
 

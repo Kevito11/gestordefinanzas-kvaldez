@@ -5,7 +5,7 @@ export interface Budget {
   category: string;
   currency: string;
   amount: number;
-  period: 'monthly' | 'weekly' | 'biweekly' | 'yearly';
+  period: 'monthly' | 'weekly' | 'biweekly' | 'yearly' | 'daily' | 'one-time';
   startDate: string;
   endDate?: string;
   payDay?: number;

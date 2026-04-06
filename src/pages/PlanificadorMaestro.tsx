@@ -10,6 +10,20 @@ import { TransactionsAPI } from '../features/transactions/Transactions.api';
 import { useAuth } from '../app/providers/AuthProvider';
 import styles from './PlanificadorMaestro.module.css';
 
+const uiToDbPeriod = (p?: string): 'monthly' | 'biweekly' | 'yearly' | 'daily' | 'one-time' | 'weekly' => {
+    if (p === 'quincenal') return 'biweekly';
+    if (p === 'anual') return 'yearly';
+    if (p === 'puntual') return 'one-time';
+    return 'monthly';
+};
+
+const dbToUiPeriod = (p?: string) => {
+    if (p === 'biweekly') return 'quincenal';
+    if (p === 'yearly') return 'anual';
+    if (p === 'one-time' || p === 'daily') return 'puntual';
+    return 'mensual';
+};
+
 const PlanificadorMaestro: React.FC = () => {
     const [incomes, setIncomes] = useState<BudgetItem[]>([]);
     const [fixedExpenses, setFixedExpenses] = useState<BudgetItem[]>([]);
@@ -33,31 +47,35 @@ const PlanificadorMaestro: React.FC = () => {
 
         try {
             // 0. Obtener estado actual de la DB para detectar borrados
-            const [dbAccounts, dbBudgets] = await Promise.all([
+            const [dbAccounts, dbBudgets, dbTrxs] = await Promise.all([
                 AccountsAPI.list(),
-                BudgetsAPI.list()
+                BudgetsAPI.list(),
+                TransactionsAPI.list()
             ]);
 
             // 1. Sincronizar Ingresos (Cuentas)
-            // Identificar qué cuentas de la base de datos ya no están en la UI para borrarlas
-            const incomeIdsInUI = new Set(incomes.map(i => i.id));
+            const incomeIdsInUI = new Set(incomes.filter(i => i && i.id).map(i => i.id));
             for (const dbAcc of dbAccounts) {
-                if (!incomeIdsInUI.has(dbAcc.id)) {
-                    await AccountsAPI.delete(dbAcc.id);
+                if (!dbAcc) continue;
+                const dbId = dbAcc.id || (dbAcc as any)._id;
+                if (dbId && typeof dbId === 'string' && !incomeIdsInUI.has(dbId)) {
+                    await AccountsAPI.delete(dbId);
                 }
             }
 
-            // Crear o actualizar las cuentas actuales
             for (const income of incomes) {
+                if (!income) continue;
                 const accountData = { 
-                    name: income.name,
-                    salary: income.amount,
+                    name: (income.name || 'Ingreso S/N').trim(),
+                    salary: Number(income.amount || 0),
                     extras: 0, 
                     currency: income.itemCurrency || currency,
-                    salaryType: (income.periodicity === 'anual' ? 'monthly' : 'monthly') as any
+                    salaryType: uiToDbPeriod(income.periodicity),
+                    payDay: income.payDay,
+                    isExecuted: income.isExecuted
                 };
 
-                if (income.id.length > 20) {
+                if (income.id && typeof income.id === 'string' && income.id.length === 24) {
                     await AccountsAPI.update(income.id, accountData);
                 } else {
                     await AccountsAPI.create(accountData as any);
@@ -65,28 +83,100 @@ const PlanificadorMaestro: React.FC = () => {
             }
 
             // 2. Sincronizar Gastos Fijos (Presupuestos)
-            // Identificar presupuestos que ya no están en la UI para borrarlos
-            const expenseIdsInUI = new Set(fixedExpenses.map(e => e.id));
+            const expenseIdsInUI = new Set(fixedExpenses.filter(e => e && e.id).map(e => e.id));
             for (const dbBud of dbBudgets) {
-                if (!expenseIdsInUI.has(dbBud.id)) {
-                    await BudgetsAPI.delete(dbBud.id);
+                if (!dbBud) continue;
+                const dbId = dbBud.id || (dbBud as any)._id;
+                if (dbId && typeof dbId === 'string' && !expenseIdsInUI.has(dbId)) {
+                    await BudgetsAPI.delete(dbId);
                 }
             }
 
-            // Crear o actualizar los presupuestos actuales
             for (const expense of fixedExpenses) {
+                if (!expense) continue;
                 const budgetData = {
-                    name: expense.name,
-                    amount: expense.amount,
-                    currency: expense.itemCurrency,
-                    period: (expense.periodicity === 'anual' ? 'yearly' : 'monthly') as 'yearly' | 'monthly',
-                    payDay: expense.payDay
+                    name: (expense.name || 'Gasto S/N').trim(),
+                    amount: Number(expense.amount || 0),
+                    currency: expense.itemCurrency || currency,
+                    period: uiToDbPeriod(expense.periodicity),
+                    payDay: expense.payDay,
+                    isExecuted: expense.isExecuted,
+                    category: 'Plan Maestro',
+                    startDate: new Date().toISOString()
                 };
 
-                if (expense.id.length > 20) {
+                if (expense.id && typeof expense.id === 'string' && expense.id.length === 24) {
                     await BudgetsAPI.update(expense.id, budgetData);
                 } else {
                     await BudgetsAPI.create(budgetData as any);
+                }
+            }
+
+            // 3. Sincronizar Gastos Variables y Ahorros (Transactions)
+            const allTrxsInUI = [...variableExpenses, ...savings];
+            const trxIdsInUI = new Set(allTrxsInUI.filter(t => t && t.id).map(t => t.id));
+            
+            for (const dbTrx of dbTrxs) {
+                if (!dbTrx) continue;
+                const dbId = dbTrx.id || (dbTrx as any)._id;
+                if (dbId && typeof dbId === 'string' && !trxIdsInUI.has(dbId)) {
+                    await TransactionsAPI.delete(dbId);
+                }
+            }
+
+            // Necesitamos una cuenta por defecto para las transacciones
+            const currentAccounts = await AccountsAPI.list();
+            const defaultAccountId = currentAccounts.length > 0 
+                ? (currentAccounts[0].id || (currentAccounts[0] as any)._id) 
+                : undefined;
+
+            if (!defaultAccountId) {
+                throw new Error("No hay una cuenta activa para guardar gastos.");
+            }
+
+            // Guardar Gastos Variables
+            for (const item of variableExpenses) {
+                if (!item) continue;
+                const trxData = {
+                    description: item.name || 'Gasto Variable',
+                    amount: Number(item.amount || 0),
+                    currency: item.itemCurrency || currency,
+                    type: 'expense' as const,
+                    category: 'Variable',
+                    accountId: defaultAccountId,
+                    date: new Date().toISOString(),
+                    payDay: item.payDay,
+                    periodicity: uiToDbPeriod(item.periodicity),
+                    isExecuted: item.isExecuted
+                };
+
+                if (item.id && typeof item.id === 'string' && item.id.length === 24) {
+                    await TransactionsAPI.update(item.id, trxData);
+                } else {
+                    await TransactionsAPI.create(trxData);
+                }
+            }
+
+            // Guardar Ahorros
+            for (const item of savings) {
+                if (!item) continue;
+                const trxData = {
+                    description: item.name || 'Ahorro',
+                    amount: Number(item.amount || 0),
+                    currency: item.itemCurrency || currency,
+                    type: 'savings' as const,
+                    category: 'Ahorro',
+                    accountId: defaultAccountId,
+                    date: new Date().toISOString(),
+                    payDay: item.payDay,
+                    periodicity: uiToDbPeriod(item.periodicity),
+                    isExecuted: item.isExecuted
+                };
+
+                if (item.id && typeof item.id === 'string' && item.id.length === 24) {
+                    await TransactionsAPI.update(item.id, trxData);
+                } else {
+                    await TransactionsAPI.create(trxData);
                 }
             }
 
@@ -130,31 +220,29 @@ const PlanificadorMaestro: React.FC = () => {
                     TransactionsAPI.list()
                 ]);
 
-                const mapPeriod = (p?: string) => {
-                    if (p === 'yearly') return 'anual';
-                    return 'mensual';
-                };
-
-                if (accounts.length > 0) {
-                    const activeAccounts = accounts.filter((a: any) => a.isActive !== false);
+                if (Array.isArray(accounts)) {
+                    const activeAccounts = accounts.filter((a: any) => a && a.isActive !== false);
                     setIncomes(activeAccounts.map((a: any) => ({
-                        id: a.id,
-                        name: a.name,
-                        amount: Number(a.salary) + Number(a.extras || 0),
-                        periodicity: mapPeriod(a.salaryType) as any,
+                        id: a.id || a._id,
+                        name: a.name || 'Ingreso',
+                        amount: Number(a.salary || 0) + Number(a.extras || 0),
+                        periodicity: dbToUiPeriod(a.salaryType) as any,
                         itemCurrency: (a.currency as 'USD' | 'DOP') || 'DOP',
+                        payDay: a.payDay,
+                        isExecuted: a.isExecuted,
                         isCustom: true
                     })));
                 }
 
-                if (budgets.length > 0) {
-                    setFixedExpenses(budgets.map(b => ({
-                        id: b.id,
-                        name: b.name,
-                        amount: Number(b.amount),
-                        periodicity: mapPeriod(b.period) as any,
+                if (Array.isArray(budgets)) {
+                    setFixedExpenses(budgets.filter((b: any) => b).map((b: any) => ({
+                        id: b.id || b._id,
+                        name: b.name || 'Gasto',
+                        amount: Number(b.amount || 0),
+                        periodicity: dbToUiPeriod(b.period) as any,
                         itemCurrency: (b.currency as 'USD' | 'DOP') || 'DOP',
                         payDay: b.payDay,
+                        isExecuted: b.isExecuted,
                         isCustom: true
                     })));
                 }
@@ -164,21 +252,24 @@ const PlanificadorMaestro: React.FC = () => {
                     const savingsT = transactions.filter((t: any) => t.type === 'savings');
 
                     setVariableExpenses(variableT.map((t: any) => ({
-                        id: t.id,
+                        id: t.id || t._id,
                         name: t.description || t.category || t.name || 'Gasto',
                         amount: Number(t.amount || 0),
-                        periodicity: 'mensual',
+                        periodicity: dbToUiPeriod(t.periodicity) as any,
                         itemCurrency: (t.currency as 'USD' | 'DOP') || 'DOP',
                         payDay: t.payDay,
+                        isExecuted: t.isExecuted,
                         isCustom: true
                     })));
 
                     setSavings(savingsT.map((t: any) => ({
-                        id: t.id,
+                        id: t.id || t._id,
                         name: t.description || t.category || t.name || 'Ahorro',
                         amount: Number(t.amount || 0),
-                        periodicity: 'mensual',
+                        periodicity: dbToUiPeriod(t.periodicity) as any,
                         itemCurrency: (t.currency as 'USD' | 'DOP') || 'DOP',
+                        payDay: t.payDay,
+                        isExecuted: t.isExecuted,
                         isCustom: true
                     })));
                 }
@@ -236,9 +327,24 @@ const PlanificadorMaestro: React.FC = () => {
                 TransactionsAPI.list()
             ]);
 
-            for (const a of accounts) await AccountsAPI.delete(a.id);
-            for (const b of budgets) await BudgetsAPI.delete(b.id);
-            for (const t of transactions) await TransactionsAPI.delete(t.id);
+            for (const a of accounts) {
+                const dbId = a.id || (a as any)._id;
+                if (dbId && typeof dbId === 'string' && dbId.length > 0) {
+                    try { await AccountsAPI.delete(dbId); } catch (e) { console.warn('Error deleting account:', dbId, e); }
+                }
+            }
+            for (const b of budgets) {
+                const dbId = b.id || (b as any)._id;
+                if (dbId && typeof dbId === 'string' && dbId.length > 0) {
+                    try { await BudgetsAPI.delete(dbId); } catch (e) { console.warn('Error deleting budget:', dbId, e); }
+                }
+            }
+            for (const t of transactions) {
+                const dbId = t.id || (t as any)._id;
+                if (dbId && typeof dbId === 'string' && dbId.length > 0) {
+                    try { await TransactionsAPI.delete(dbId); } catch (e) { console.warn('Error deleting transaction:', dbId, e); }
+                }
+            }
 
             alert('✅ Todos los datos han sido eliminados exitosamente.');
             window.location.reload(); 
@@ -273,7 +379,7 @@ const PlanificadorMaestro: React.FC = () => {
                 case 'anual': multiplier = 1 / 12; break;
                 case 'trimestral': multiplier = 1 / 3; break;
                 case 'semestral': multiplier = 1 / 6; break;
-                case 'puntual': multiplier = 1 / 12; break;
+                case 'puntual': multiplier = 1; break;
                 default: multiplier = 1; break;
             }
 
@@ -323,25 +429,25 @@ const PlanificadorMaestro: React.FC = () => {
                     </div>
                     
                     <div className={styles.actionsArea}>
-                        {user ? (
-                            <div className={styles.dropdownContainer} ref={dropdownRef}>
-                                <button 
-                                    className={styles.dropdownToggle}
-                                    onClick={() => setActionsOpen(!actionsOpen)}
-                                >
-                                    <span>⚙️</span> Acciones Rápidas
-                                </button>
-                                
-                                <AnimatePresence>
-                                    {actionsOpen && (
-                                        <motion.div 
-                                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                            transition={{ duration: 0.2, ease: "easeOut" }}
-                                            className={styles.dropdownMenu}
-                                            style={{ transformOrigin: 'top right' }}
-                                        >
+                        <div className={styles.dropdownContainer} ref={dropdownRef}>
+                            <button 
+                                className={styles.dropdownToggle}
+                                onClick={() => setActionsOpen(!actionsOpen)}
+                            >
+                                <span>⚙️</span> Acciones Rápidas
+                            </button>
+                            
+                            <AnimatePresence>
+                                {actionsOpen && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                        transition={{ duration: 0.2, ease: "easeOut" }}
+                                        className={styles.dropdownMenu}
+                                        style={{ transformOrigin: 'top right' }}
+                                    >
+                                        {user ? (
                                             <button 
                                                 onClick={handleSavePlan} 
                                                 className={`${styles.dropdownItem} ${styles.saveItem}`}
@@ -349,39 +455,83 @@ const PlanificadorMaestro: React.FC = () => {
                                             >
                                                 <span>💾</span> {saving ? 'Guardando...' : 'Guardar Planificación'}
                                             </button>
-
-                                            <div className={styles.divider}></div>
-
-                                            <Link to="/" className={styles.dropdownItem}>
-                                                <span>🏠</span> Inicio
+                                        ) : (
+                                            <Link to="/login" className={`${styles.dropdownItem} ${styles.saveItem}`} style={{ opacity: 0.7 }}>
+                                                <span>🔑</span> Logueate p/ Guardar
                                             </Link>
-                                            <Link to="/transactions" className={styles.dropdownItem}>
-                                                <span>💸</span> Historial
-                                            </Link>
-                                            <button onClick={() => {
-                                                handleClearAll();
-                                                setActionsOpen(false);
-                                            }} className={styles.dropdownItem}>
-                                                <span>🗑️</span> Borrar todo
-                                            </button>
-                                            <button onClick={() => {
-                                                setIsDataExchangeOpen(true);
-                                                setActionsOpen(false);
-                                            }} className={styles.dropdownItem}>
-                                                <span>🗂️</span> Importar/Exportar
-                                            </button>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-                        ) : (
-                            <Link to="/login" className={`${styles.actionBtn} ${styles.loginBtn}`}>
-                                Iniciar Sesión para Guardar
-                            </Link>
-                        )}
+                                        )}
+
+                                        <div className={styles.divider}></div>
+
+                                        <Link to="/" className={styles.dropdownItem}>
+                                            <span>🏠</span> Inicio
+                                        </Link>
+                                        <Link to="/transactions" className={styles.dropdownItem}>
+                                            <span>💸</span> Historial
+                                        </Link>
+                                        <button onClick={() => {
+                                            handleClearAll();
+                                            setActionsOpen(false);
+                                        }} className={styles.dropdownItem}>
+                                            <span>🗑️</span> Borrar todo
+                                        </button>
+                                        <button onClick={() => {
+                                            setIsDataExchangeOpen(true);
+                                            setActionsOpen(false);
+                                        }} className={styles.dropdownItem}>
+                                            <span>🗂️</span> Importar/Exportar
+                                        </button>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </div>
                 </div>
             </header>
+
+            <section className={styles.legendSection}>
+                <div className={styles.legendTitle}>
+                    <span>ℹ️</span> Guía de Parámetros
+                </div>
+                <div className={styles.legendGrid}>
+                    <div className={styles.legendItem}>
+                        <div className={styles.legendHeader}>
+                            <div className={`${styles.icon} ${styles.iconCheck}`}>✓</div>
+                            Efectuado (Check)
+                        </div>
+                        <div className={styles.legendDesc}>
+                            Márcalo para atenuar y tachar un registro cuando el pago se haya realizado. Útil para llevar control del mes.
+                        </div>
+                    </div>
+                    <div className={styles.legendItem}>
+                        <div className={styles.legendHeader}>
+                            <div className={`${styles.icon} ${styles.iconPeriod}`}>⏱️</div>
+                            Periodicidad
+                        </div>
+                        <div className={styles.legendDesc}>
+                            Afecta el cálculo: <strong>Mensual</strong> toma el valor exacto, <strong>Quincenal</strong> lo multiplica ×2, <strong>Anual</strong> lo divide ÷12.
+                        </div>
+                    </div>
+                    <div className={styles.legendItem}>
+                        <div className={styles.legendHeader}>
+                            <div className={`${styles.icon} ${styles.iconDay}`}>📅</div>
+                            Día (Cobro/Pago)
+                        </div>
+                        <div className={styles.legendDesc}>
+                            Establece el día del mes que esperas recibir el ingreso o realizar el gasto. Sirve como recordatorio para tu flujo de caja.
+                        </div>
+                    </div>
+                    <div className={styles.legendItem}>
+                        <div className={styles.legendHeader}>
+                            <div className={`${styles.icon} ${styles.iconCurrency}`}>💱</div>
+                            Moneda (USD/DOP)
+                        </div>
+                        <div className={styles.legendDesc}>
+                            Si registras un item en USD y tu resumen es en DOP (RD$), el monto se convertirá automáticamente a DOP en el resumen.
+                        </div>
+                    </div>
+                </div>
+            </section>
 
             <div className={styles.gridContainer}>
                 <div className={styles.formsArea}>
@@ -417,7 +567,11 @@ const PlanificadorMaestro: React.FC = () => {
                 </div>
             </div>
 
-            <DataExchangeModal isOpen={isDataExchangeOpen} onClose={() => setIsDataExchangeOpen(false)} />
+            <DataExchangeModal 
+                isOpen={isDataExchangeOpen} 
+                onClose={() => setIsDataExchangeOpen(false)} 
+                currentData={{ incomes, fixedExpenses, variableExpenses, savings }}
+            />
         </div>
     );
 };

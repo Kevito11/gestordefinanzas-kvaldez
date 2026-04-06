@@ -1,78 +1,52 @@
-# Gestión Financiera Personal
+# 💰 Gestión de Finanzas Personales
 
-Una aplicación web moderna para el control de finanzas personales, construida con React, TypeScript y Vite.
+<div align="center">
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" />
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" />
+  <img src="https://img.shields.io/badge/Redux-764ABC?style=for-the-badge&logo=redux&logoColor=white" />
+  <img src="https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white" />
+  <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" />
+</div>
 
-## Características
+---
 
-- **Gestión de Cuentas**: Administra tus fuentes de ingresos
-- **Control de Transacciones**: Registra ingresos y gastos fácilmente
-- **Gastos Fijos**: Gestiona tus gastos recurrentes (semanal, quincenal, mensual, anual)
-- **Dashboard Interactivo**: Visualiza tu información financiera en tiempo real
+## 📝 Descripción del Proyecto
 
-## Tecnologías Utilizadas
+Este es un sistema simplificado y moderno de **Gestión de Finanzas Personales** diseñado para centralizar el control de ingresos, gastos y ahorros. La aplicación permite una visualización clara del flujo de caja, ayudando a tomar mejores decisiones financieras mediante interfaces intuitivas y dinámicas.
 
-- **Frontend**: React 19, TypeScript, Vite
-- **Backend**: Node.js, Express
-- **Base de Datos**: JSON files (para desarrollo)
-- **Estilos**: CSS Modules
-- **Estado**: React Context + Hooks
+### ⚠️ Nota de Uso Personal
+> [!IMPORTANT]  
+> Este proyecto ha sido desarrollado exclusivamente para **uso personal**. No está destinado a ser una herramienta comercial ni para uso público general. Se enfoca en satisfacer necesidades específicas de organización financiera propia y como entorno de aprendizaje técnico.
 
-## Instalación y Uso
+---
 
-1. Clona el repositorio
-2. Instala las dependencias:
-   ```bash
-   npm install
-   ```
-3. Inicia el servidor de desarrollo:
-   ```bash
-   npm run dev
-   ```
-4. En otra terminal, inicia la API:
-   ```bash
-   npm run api
-   ```
+## ✨ Características Principales
 
-La aplicación estará disponible en `http://localhost:5175`
+- **📊 Dashboard Interactivo**: Resumen visual en tiempo real de tu estado financiero actual.
+- **🏦 Gestión de Cuentas**: Control total sobre tus diferentes fuentes de ingresos y fondos.
+- **💸 Registro de Transacciones**: Sistema ágil para documentar cada ingreso y egreso con categorías detalladas.
+- **📅 Gastos Fijos y Recurrentes**: Automatización lógica para gastos periódicos (diarios, semanales, quincenales, mensuales o anuales).
+- **📥 Importación/Exportación**: Soporte para archivos `.csv` y `.xlsx` para portabilidad de datos.
+- **💫 Interfaz Premium**: Animaciones fluidas mediante Framer Motion y diseño responsivo.
 
-## Scripts Disponibles
+---
 
-- `npm run dev` - Inicia el servidor de desarrollo
-- `npm run api` - Inicia el servidor de la API
-- `npm run build` - Construye la aplicación para producción
-- `npm run preview` - Vista previa de la build de producción
+## 🛠️ Stack Tecnológico
 
-## Estructura del Proyecto
+| Componente | Tecnologías |
+| :--- | :--- |
+| **Frontend** | React 19, TypeScript, Vite |
+| **Estado** | Redux Toolkit |
+| **Animaciones** | Framer Motion |
+| **Backend** | Node.js, Express.js |
+| **Base de Datos** | MongoDB (Mongoose) |
+| **Procesamiento** | PapaParse (CSV), XLSX |
+| **Pruebas** | Vitest |
 
-```
-src/
-├── app/              # Configuración de la aplicación
-├── components/       # Componentes reutilizables
-├── contexts/         # Contextos de React
-├── features/         # Funcionalidades principales
-│   ├── accounts/     # Gestión de cuentas
-│   ├── budgets/      # Gastos fijos
-│   └── transactions/ # Transacciones
-├── lib/              # Utilidades
-├── pages/            # Páginas de la aplicación
-└── types/            # Definiciones de tipos
-```
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
+
+## 📜 Licencia
+
+Este proyecto es privado y de uso personal. No se concede permiso para uso comercial sin autorización previa.
+

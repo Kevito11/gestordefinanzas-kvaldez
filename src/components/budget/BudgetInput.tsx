@@ -9,12 +9,14 @@ interface BudgetInputProps {
     periodicity: Periodicity;
     itemCurrency: 'USD' | 'DOP';
     payDay?: number;
+    isExecuted?: boolean;
     isCustom?: boolean;
     onNameChange?: (name: string) => void;
     onAmountChange: (amount: number) => void;
     onPeriodicityChange: (periodicity: Periodicity) => void;
     onItemCurrencyChange: (currency: 'USD' | 'DOP') => void;
     onPayDayChange: (day: number | undefined) => void;
+    onIsExecutedChange?: (isExecuted: boolean) => void;
     onDelete?: () => void;
 }
 
@@ -24,12 +26,14 @@ const BudgetInput: React.FC<BudgetInputProps> = ({
     periodicity,
     itemCurrency,
     payDay,
+    isExecuted = false,
     isCustom = false,
     onNameChange,
     onAmountChange,
     onPeriodicityChange,
     onItemCurrencyChange,
     onPayDayChange,
+    onIsExecutedChange,
     onDelete,
 }) => {
     const today = new Date().getDate();
@@ -47,8 +51,17 @@ const BudgetInput: React.FC<BudgetInputProps> = ({
     }
 
     return (
-        <div className={`${styles.wrapper} ${dueClass}`}>
+        <div className={`${styles.wrapper} ${dueClass} ${isExecuted ? styles.executed : ''}`}>
             <div className={styles.container}>
+                <div className={styles.checkboxContainer}>
+                    <input 
+                        type="checkbox" 
+                        checked={isExecuted}
+                        onChange={(e) => onIsExecutedChange?.(e.target.checked)}
+                        className={styles.checkbox}
+                        title="Marcar como efectuado"
+                    />
+                </div>
                 <div className={styles.labelContainer}>
                     {isCustom && onNameChange ? (
                         <input

@@ -24,7 +24,9 @@ const getTemplateData = (type: DataType | 'all') => {
                 currency: 'DOP',
                 category: '',
                 description: '',
-                date: isoNow().split('T')[0] // solo la fecha por defecto
+                date: isoNow().split('T')[0],
+                payDay: 0,
+                isExecuted: false
             }];
         case 'accounts':
             return [{
@@ -32,7 +34,9 @@ const getTemplateData = (type: DataType | 'all') => {
                 currency: 'DOP',
                 salaryType: 'monthly',
                 salary: 0,
-                extras: 0
+                extras: 0,
+                payDay: 0,
+                isExecuted: false
             }];
         case 'budgets':
             return [{
@@ -41,7 +45,9 @@ const getTemplateData = (type: DataType | 'all') => {
                 currency: 'DOP',
                 amount: 0,
                 period: 'monthly',
-                startDate: isoNow().split('T')[0]
+                startDate: isoNow().split('T')[0],
+                payDay: 0,
+                isExecuted: false
             }];
         case 'all':
             return [{
@@ -58,7 +64,9 @@ const getTemplateData = (type: DataType | 'all') => {
                 salary: 0,
                 extras: 0,
                 period: 'monthly',
-                startDate: isoNow().split('T')[0]
+                startDate: isoNow().split('T')[0],
+                payDay: 0,
+                isExecuted: false
             }];
         default:
             return [];
@@ -70,10 +78,12 @@ const getTemplateData = (type: DataType | 'all') => {
  */
 const detectDataType = (firstRow: any): DataType | 'unknown' => {
     if (!firstRow) return 'unknown';
-    const keys = Object.keys(firstRow);
-    if (keys.includes('accountId') && keys.includes('date')) return 'transactions';
-    if (keys.includes('salaryType') && keys.includes('salary')) return 'accounts';
-    if (keys.includes('period') && keys.includes('startDate')) return 'budgets';
+    const keys = Object.keys(firstRow).map(k => k.toLowerCase());
+    
+    if (keys.includes('accountid') || (keys.includes('date') && keys.includes('amount') && !keys.includes('period'))) return 'transactions';
+    if (keys.includes('salarytype') || keys.includes('salary')) return 'accounts';
+    if (keys.includes('period') || keys.includes('periodicity') || keys.includes('frecuencia') || keys.includes('startdate')) return 'budgets';
+    
     return 'unknown';
 };
 
@@ -179,31 +189,39 @@ export const parseFileData = (file: File): Promise<ParsedDataPayload> => {
                     const data = new Uint8Array(e.target?.result as ArrayBuffer);
                     const workbook = XLSX.read(data, { type: 'array' });
                     
-                    // Procesar todas las hojas
+                    // Normalizar propiedades y procesar todas las hojas
                     workbook.SheetNames.forEach(sheetName => {
                         const worksheet = workbook.Sheets[sheetName];
                         const jsonData = XLSX.utils.sheet_to_json<any>(worksheet, { defval: '' });
                         const validData = jsonData.filter(row => Object.values(row as object).some(val => val !== '' && val !== null));
                         
                         if (validData.length > 0) {
-                            let detectedType: DataType | 'unknown' = sheetName as DataType;
-                            if (['transactions', 'accounts', 'budgets'].includes(detectedType)) {
-                                // Pestaña explícita
-                                payload[detectedType] = [...payload[detectedType], ...validData];
-                            } else {
-                                // Procesar fila por fila igual que el CSV
-                                validData.forEach(row => {
-                                    if (row.data_type && ['I', 'P', 'V', 'A'].includes(String(row.data_type).toUpperCase())) {
-                                        const code = String(row.data_type).toUpperCase();
-                                        if (code === 'I') payload.accounts.push(row);
-                                        else if (code === 'P') payload.budgets.push(row);
-                                        else if (code === 'V') payload.transactions.push({...row, type: 'expense'});
-                                        else if (code === 'A') payload.transactions.push({...row, type: 'savings'});
-                                    } else {
-                                        const dt = detectDataType(row);
-                                        if (dt !== 'unknown') payload[dt].push(row);
-                                    }
-                                });
+                            const normalizedData = validData.map(row => {
+                                const normalized: any = { ...row };
+                                // Mapear descripción a name
+                                if (!normalized.name && normalized.description) normalized.name = normalized.description;
+                                if (!normalized.name && normalized.concepto) normalized.name = normalized.concepto;
+                                // Mapear periodicidad
+                                if (!normalized.period && normalized.periodicity) normalized.period = normalized.periodicity;
+                                if (!normalized.period && normalized.frecuencia) normalized.period = normalized.frecuencia;
+                                // Mapear día de pago
+                                if (!normalized.payDay && normalized.dia_de_pago) normalized.payDay = Number(normalized.dia_de_pago);
+                                if (!normalized.payDay && normalized.vencimiento) normalized.payDay = Number(normalized.vencimiento);
+                                // Mapear estado efectuado
+                                if (normalized.isExecuted === undefined && normalized.efectuado !== undefined) normalized.isExecuted = normalized.efectuado;
+                                if (normalized.isExecuted === undefined && normalized.pagado !== undefined) normalized.isExecuted = normalized.pagado;
+                                if (normalized.isExecuted === undefined && normalized.hecho !== undefined) normalized.isExecuted = normalized.hecho;
+                                return normalized;
+                            });
+
+                            let detectedType: DataType | 'unknown' = detectDataType(normalizedData[0]);
+                            // Si el nombre de la hoja es explícito y no detectamos nada, usamos el nombre de la hoja
+                            if (detectedType === 'unknown' && ['transactions', 'accounts', 'budgets'].includes(sheetName.toLowerCase())) {
+                                detectedType = sheetName.toLowerCase() as DataType;
+                            }
+
+                            if (detectedType !== 'unknown') {
+                                payload[detectedType] = [...payload[detectedType], ...normalizedData];
                             }
                         }
                     });
@@ -224,7 +242,6 @@ export const parseFileData = (file: File): Promise<ParsedDataPayload> => {
                 complete: (results) => {
                     const validData = results.data as any[];
                     if (validData.length > 0) {
-                        // Procesar fila por fila en lugar de todas juntas al mismo destino
                         validData.forEach(row => {
                             if (row.data_type && ['I', 'P', 'V', 'A'].includes(row.data_type.toUpperCase())) {
                                 const code = row.data_type.toUpperCase();
@@ -242,13 +259,29 @@ export const parseFileData = (file: File): Promise<ParsedDataPayload> => {
                     }
                     resolve(payload);
                 },
-                error: (error) => {
-                    reject(error);
-                }
+                error: (error) => reject(error)
             });
         }
+        else if (extension === '.json') {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const content = e.target?.result as string;
+                    const data = JSON.parse(content);
+                    resolve({
+                        transactions: Array.isArray(data.transactions) ? data.transactions : [],
+                        accounts: Array.isArray(data.accounts) ? data.accounts : [],
+                        budgets: Array.isArray(data.budgets) ? data.budgets : []
+                    });
+                } catch (error) {
+                    reject(new Error('Error al parsear el archivo JSON. Formato inválido.'));
+                }
+            };
+            reader.onerror = (error) => reject(error);
+            reader.readAsText(file);
+        }
         else {
-            reject(new Error(`Extension de archivo no soportada: ${extension}`));
+            reject(new Error(`Extensión de archivo no soportada: ${extension}`));
         }
     });
 };

@@ -5,10 +5,11 @@ const budgetSchema = new mongoose.Schema({
   category: { type: String, required: true },
   currency: { type: String, required: true },
   amount: { type: Number, required: true },
-  period: { type: String, enum: ['monthly', 'weekly', 'biweekly', 'yearly'], required: true },
+  period: { type: String, enum: ['monthly', 'weekly', 'biweekly', 'yearly', 'daily', 'one-time'], required: true },
   startDate: { type: Date, required: true },
   endDate: { type: Date },
   payDay: { type: Number },
+  isExecuted: { type: Boolean, default: false },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 }, { timestamps: true });
 

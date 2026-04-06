@@ -1,5 +1,5 @@
 // src/types/account.ts
-export type SalaryType = 'monthly' | 'biweekly' | 'weekly' | 'daily';
+export type SalaryType = 'monthly' | 'biweekly' | 'weekly' | 'daily' | 'yearly' | 'one-time';
 
 export interface Account {
   id: string;

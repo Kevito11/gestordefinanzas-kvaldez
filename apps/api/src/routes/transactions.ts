@@ -40,11 +40,15 @@ router.post('/', async (req: any, res) => {
       counterpartAccountId: req.body.counterpartAccountId,
       tags: req.body.tags ?? [],
       userId: req.user.userId,
+      payDay: req.body.payDay ? Number(req.body.payDay) : undefined,
+      periodicity: req.body.periodicity ?? 'one-time',
+      isExecuted: req.body.isExecuted !== undefined ? req.body.isExecuted : false,
     });
     await tx.save();
     res.status(201).json(tx);
   } catch (error) {
-    res.status(500).json({ error: 'Error creating transaction' });
+    console.error("Error creating transaction:", error);
+    res.status(500).json({ error: 'Error creating transaction', details: error });
   }
 });
 
@@ -58,7 +62,8 @@ router.put('/:id', async (req: any, res) => {
     if (!tx) return res.status(404).json({ error: 'Not found' });
     res.json(tx);
   } catch (error) {
-    res.status(500).json({ error: 'Error updating transaction' });
+    console.error("Error updating transaction:", error);
+    res.status(500).json({ error: 'Error updating transaction', details: error });
   }
 });
 

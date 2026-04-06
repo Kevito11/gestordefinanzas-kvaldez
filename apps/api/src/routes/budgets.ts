@@ -27,12 +27,14 @@ router.post('/', async (req: any, res) => {
       startDate: req.body.startDate ? new Date(req.body.startDate) : new Date(),
       endDate: req.body.endDate ? new Date(req.body.endDate) : undefined,
       payDay: req.body.payDay,
+      isExecuted: req.body.isExecuted !== undefined ? req.body.isExecuted : false,
       userId: req.user.userId,
     });
     await budget.save();
     res.status(201).json(budget);
   } catch (error) {
-    res.status(500).json({ error: 'Error creating budget' });
+    console.error("Error creating budget:", error);
+    res.status(500).json({ error: 'Error creating budget', details: error });
   }
 });
 
@@ -46,7 +48,8 @@ router.put('/:id', async (req: any, res) => {
     if (!budget) return res.status(404).json({ error: 'Not found' });
     res.json(budget);
   } catch (error) {
-    res.status(500).json({ error: 'Error updating budget' });
+    console.error("Error updating budget:", error);
+    res.status(500).json({ error: 'Error updating budget', details: error });
   }
 });
 
