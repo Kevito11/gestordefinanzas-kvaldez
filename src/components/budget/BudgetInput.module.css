@@ -24,12 +24,17 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 2px;
+  overflow: hidden;
 }
 
 .label {
   font-weight: 500;
   color: var(--text-main);
   font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 .nameInput {
@@ -39,10 +44,13 @@
   width: 100%;
   max-width: 240px;
   min-width: 0;
+  box-sizing: border-box;
   font-size: 0.95rem;
   background: transparent;
   transition: all 0.2s;
   text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .nameInput:hover {
