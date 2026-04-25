@@ -31,7 +31,7 @@ const PlanificadorMaestro: React.FC = () => {
     const [savings, setSavings] = useState<BudgetItem[]>([]);
     const [currency, setCurrency] = useState<'USD' | 'DOP'>('DOP');
     const [timeframe, setTimeframe] = useState<'mensual' | 'quincenal' | 'puntual' | 'original'>('mensual');
-    const [exchangeRate, setExchangeRate] = useState<number>(60.00); 
+    const [exchangeRate, setExchangeRate] = useState<number>(59.2362); 
     const [isDataExchangeOpen, setIsDataExchangeOpen] = useState(false);
     const [actionsOpen, setActionsOpen] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -202,6 +202,7 @@ const PlanificadorMaestro: React.FC = () => {
     }, []);
 
     useEffect(() => {
+        /* 
         fetch('https://api.exchangerate-api.com/v4/latest/USD')
             .then(res => res.json())
             .then(data => {
@@ -210,6 +211,7 @@ const PlanificadorMaestro: React.FC = () => {
                 }
             })
             .catch(err => console.error("Error cargando tasa de cambio:", err));
+        */
 
         const loadData = async () => {
             if (!user) return; 
