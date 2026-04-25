@@ -57,56 +57,58 @@ const BudgetInput: React.FC<BudgetInputProps> = ({
     return (
         <div className={`${styles.wrapper} ${dueClass} ${isExecuted ? styles.executed : ''}`}>
             <div className={styles.container}>
-                <div className={styles.checkboxContainer}>
-                    <input 
-                        type="checkbox" 
-                        checked={isExecuted}
-                        onChange={(e) => onIsExecutedChange?.(e.target.checked)}
-                        className={styles.checkbox}
-                        title="Marcar como efectuado"
-                    />
-                </div>
-                <div className={styles.labelContainer}>
-                    {isCustom && onNameChange ? (
-                        <input
-                            type="text"
-                            value={label}
-                            onChange={(e) => onNameChange(e.target.value)}
-                            className={styles.nameInput}
-                            placeholder="Nombre del concepto"
+                <div className={styles.topRow}>
+                    <div className={styles.checkboxContainer}>
+                        <input 
+                            type="checkbox" 
+                            checked={isExecuted}
+                            onChange={(e) => onIsExecutedChange?.(e.target.checked)}
+                            className={styles.checkbox}
+                            title="Marcar como efectuado"
                         />
-                    ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <label className={styles.label}>{label}</label>
-                        </div>
-                    )}
-                    {onExecutionDateChange && (
-                        <div className={`${styles.datePickerWrapper} ${!isExecuted ? styles.dimmed : ''}`}>
-                            <span 
-                                className={styles.calendarIcon} 
-                                title="Fecha de ejecución"
-                                onClick={(e) => {
-                                    const input = e.currentTarget.nextElementSibling as HTMLInputElement;
-                                    if (input && input.showPicker) {
-                                        input.showPicker();
-                                    } else if (input) {
-                                        input.focus();
-                                    }
-                                }}
-                            >
-                                📅
-                            </span>
-                            <input 
-                                type="date"
-                                value={executionDate ? executionDate.split('T')[0] : ''}
-                                onChange={(e) => {
-                                    onExecutionDateChange(e.target.value ? new Date(e.target.value).toISOString() : '');
-                                }}
-                                className={`${styles.executionDateInput} ${!executionDate ? styles.hideDateInput : ''}`}
-                                title="Fecha exacta de la transacción"
+                    </div>
+                    <div className={styles.labelContainer}>
+                        {isCustom && onNameChange ? (
+                            <input
+                                type="text"
+                                value={label}
+                                onChange={(e) => onNameChange(e.target.value)}
+                                className={styles.nameInput}
+                                placeholder="Nombre del concepto"
                             />
-                        </div>
-                    )}
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <label className={styles.label}>{label}</label>
+                            </div>
+                        )}
+                        {onExecutionDateChange && (
+                            <div className={`${styles.datePickerWrapper} ${!isExecuted ? styles.dimmed : ''}`}>
+                                <span 
+                                    className={styles.calendarIcon} 
+                                    title="Fecha de ejecución"
+                                    onClick={(e) => {
+                                        const input = e.currentTarget.nextElementSibling as HTMLInputElement;
+                                        if (input && input.showPicker) {
+                                            input.showPicker();
+                                        } else if (input) {
+                                            input.focus();
+                                        }
+                                    }}
+                                >
+                                    📅
+                                </span>
+                                <input 
+                                    type="date"
+                                    value={executionDate ? executionDate.split('T')[0] : ''}
+                                    onChange={(e) => {
+                                        onExecutionDateChange(e.target.value ? new Date(e.target.value).toISOString() : '');
+                                    }}
+                                    className={`${styles.executionDateInput} ${!executionDate ? styles.hideDateInput : ''}`}
+                                    title="Fecha exacta de la transacción"
+                                />
+                            </div>
+                        )}
+                    </div>
                 </div>
                 <div className={styles.inputs}>
                     <input
