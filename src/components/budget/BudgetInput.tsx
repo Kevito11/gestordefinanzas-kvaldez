@@ -80,14 +80,22 @@ const BudgetInput: React.FC<BudgetInputProps> = ({
                             <label className={styles.label}>{label}</label>
                         </div>
                     )}
-                    {isExecuted && onExecutionDateChange && (
-                        <input 
-                            type="date"
-                            value={executionDate ? executionDate.split('T')[0] : ''}
-                            onChange={(e) => onExecutionDateChange(e.target.value ? new Date(e.target.value).toISOString() : '')}
-                            className={styles.executionDateInput}
-                            title="Fecha exacta de la transacción"
-                        />
+                    {onExecutionDateChange && (
+                        <div className={`${styles.datePickerWrapper} ${!isExecuted ? styles.dimmed : ''}`}>
+                            <span className={styles.calendarIcon} title="Fecha de ejecución">📅</span>
+                            <input 
+                                type="date"
+                                value={executionDate ? executionDate.split('T')[0] : ''}
+                                onChange={(e) => {
+                                    onExecutionDateChange(e.target.value ? new Date(e.target.value).toISOString() : '');
+                                    if (e.target.value && !isExecuted && onIsExecutedChange) {
+                                        onIsExecutedChange(true);
+                                    }
+                                }}
+                                className={styles.executionDateInput}
+                                title="Fecha exacta de la transacción"
+                            />
+                        </div>
                     )}
                 </div>
                 <div className={styles.inputs}>

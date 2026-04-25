@@ -248,8 +248,31 @@
     font-size: 0.75rem;
     padding: 2px;
     color: #666;
-    margin-top: 4px;
     width: 110px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    background: transparent;
+}
+
+.datePickerWrapper {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    background: #f8fafc;
+    padding: 2px 4px;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    width: fit-content;
+}
+
+.datePickerWrapper.dimmed {
+    opacity: 0.5;
+    background: transparent;
+    border: 1px dashed #ccc;
+}
+
+.calendarIcon {
+    font-size: 0.8rem;
+    cursor: pointer;
 }
