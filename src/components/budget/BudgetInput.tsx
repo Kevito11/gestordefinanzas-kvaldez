@@ -82,14 +82,27 @@ const BudgetInput: React.FC<BudgetInputProps> = ({
                     )}
                     {onExecutionDateChange && (
                         <div className={`${styles.datePickerWrapper} ${!isExecuted ? styles.dimmed : ''}`}>
-                            <span className={styles.calendarIcon} title="Fecha de ejecución">📅</span>
+                            <span 
+                                className={styles.calendarIcon} 
+                                title="Fecha de ejecución"
+                                onClick={(e) => {
+                                    const input = e.currentTarget.nextElementSibling as HTMLInputElement;
+                                    if (input && input.showPicker) {
+                                        input.showPicker();
+                                    } else if (input) {
+                                        input.focus();
+                                    }
+                                }}
+                            >
+                                📅
+                            </span>
                             <input 
                                 type="date"
                                 value={executionDate ? executionDate.split('T')[0] : ''}
                                 onChange={(e) => {
                                     onExecutionDateChange(e.target.value ? new Date(e.target.value).toISOString() : '');
                                 }}
-                                className={styles.executionDateInput}
+                                className={`${styles.executionDateInput} ${!executionDate ? styles.hideDateInput : ''}`}
                                 title="Fecha exacta de la transacción"
                             />
                         </div>
