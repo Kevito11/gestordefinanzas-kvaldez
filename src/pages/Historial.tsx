@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../app/providers/AuthProvider';
-import { ExecutionsAPI, ExecutionLog } from '../features/executions/executions.api';
+import { ExecutionsAPI, type ExecutionLog } from '../features/executions/executions.api';
 import styles from './Historial.module.css';
 
 export default function Historial() {
