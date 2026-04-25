@@ -88,9 +88,6 @@ const BudgetInput: React.FC<BudgetInputProps> = ({
                                 value={executionDate ? executionDate.split('T')[0] : ''}
                                 onChange={(e) => {
                                     onExecutionDateChange(e.target.value ? new Date(e.target.value).toISOString() : '');
-                                    if (e.target.value && !isExecuted && onIsExecutedChange) {
-                                        onIsExecutedChange(true);
-                                    }
                                 }}
                                 className={styles.executionDateInput}
                                 title="Fecha exacta de la transacción"

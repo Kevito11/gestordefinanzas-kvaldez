@@ -49,16 +49,7 @@ export default function Historial() {
 
     if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Cargando historial...</div>;
 
-    // Agrupar por Mes y Año
-    const groupedLogs = logs.reduce((acc, log) => {
-        const date = new Date(log.executionDate);
-        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        if (!acc[key]) acc[key] = [];
-        acc[key].push(log);
-        return acc;
-    }, {} as Record<string, ExecutionLog[]>);
-
-    const sortedMonths = Object.keys(groupedLogs).sort((a, b) => b.localeCompare(a));
+    const sortedLogs = [...logs].sort((a, b) => new Date(b.executionDate).getTime() - new Date(a.executionDate).getTime());
 
     const getTypeColor = (type: string) => {
         switch (type) {
@@ -83,91 +74,79 @@ export default function Historial() {
             <header className={styles.header}>
                 <div className={styles.headerTitle}>
                     <h1>Historial de Ejecuciones</h1>
-                    <p>Aquí se registra la fecha exacta en la que un concepto fue marcado como "Efectuado".</p>
+                    <p>Registro histórico de los conceptos marcados como "Efectuado", ordenados por más recientes.</p>
                 </div>
             </header>
 
-            {sortedMonths.length === 0 && (
+            {sortedLogs.length === 0 ? (
                 <div className={styles.emptyState}>
                     No hay ejecuciones registradas. Marca algunos conceptos como efectuados en el Planificador Maestro.
                 </div>
-            )}
+            ) : (
+                <div className={styles.tableWrapper}>
+                    <table className={styles.table}>
+                        <thead>
+                            <tr>
+                                <th>Fecha Exacta</th>
+                                <th>Descripción</th>
+                                <th>Tipo</th>
+                                <th>Monto</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sortedLogs.map(log => {
+                                const logId = log.id || log._id || '';
+                                const isEditing = editingLogId === logId;
 
-            {sortedMonths.map(monthKey => {
-                const [year, month] = monthKey.split('-');
-                const monthName = new Date(Number(year), Number(month) - 1).toLocaleString('es-ES', { month: 'long', year: 'numeric' });
-                const logsForMonth = groupedLogs[monthKey].sort((a, b) => new Date(b.executionDate).getTime() - new Date(a.executionDate).getTime());
-
-                return (
-                    <div key={monthKey} className={styles.monthGroup}>
-                        <h2 className={styles.monthTitle}>{monthName.charAt(0).toUpperCase() + monthName.slice(1)}</h2>
-                        
-                        <div className={styles.tableWrapper}>
-                            <table className={styles.table}>
-                                <thead>
-                                    <tr>
-                                        <th>Fecha Exacta</th>
-                                        <th>Concepto</th>
-                                        <th>Tipo</th>
-                                        <th>Monto</th>
-                                        <th>Acciones</th>
+                                return (
+                                    <tr key={logId}>
+                                        <td>
+                                            {isEditing ? (
+                                                <div className={styles.editDateGroup}>
+                                                    <input 
+                                                        type="date" 
+                                                        value={editDate}
+                                                        onChange={(e) => setEditDate(e.target.value)}
+                                                        className={styles.dateInput}
+                                                    />
+                                                    <button className={styles.saveBtn} onClick={() => handleSaveDate(logId)}>OK</button>
+                                                    <button className={styles.cancelBtn} onClick={() => setEditingLogId(null)}>X</button>
+                                                </div>
+                                            ) : (
+                                                <span 
+                                                    className={styles.dateText} 
+                                                    onClick={() => {
+                                                        setEditDate(log.executionDate.split('T')[0]);
+                                                        setEditingLogId(logId);
+                                                    }}
+                                                    title="Clic para cambiar la fecha"
+                                                >
+                                                    {new Date(log.executionDate).toLocaleDateString('es-ES')}
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td><strong>{log.itemName}</strong></td>
+                                        <td>
+                                            <span className={styles.badge} style={{ backgroundColor: getTypeColor(log.itemType) }}>
+                                                {getTypeName(log.itemType)}
+                                            </span>
+                                        </td>
+                                        <td style={{ color: getTypeColor(log.itemType), fontWeight: 'bold' }}>
+                                            {log.currency} {log.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                        </td>
+                                        <td>
+                                            <button className={styles.deleteBtn} onClick={() => handleDelete(logId)}>
+                                                Eliminar
+                                            </button>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {logsForMonth.map(log => {
-                                        const logId = log.id || log._id || '';
-                                        const isEditing = editingLogId === logId;
-
-                                        return (
-                                            <tr key={logId}>
-                                                <td>
-                                                    {isEditing ? (
-                                                        <div className={styles.editDateGroup}>
-                                                            <input 
-                                                                type="date" 
-                                                                value={editDate}
-                                                                onChange={(e) => setEditDate(e.target.value)}
-                                                                className={styles.dateInput}
-                                                            />
-                                                            <button className={styles.saveBtn} onClick={() => handleSaveDate(logId)}>OK</button>
-                                                            <button className={styles.cancelBtn} onClick={() => setEditingLogId(null)}>X</button>
-                                                        </div>
-                                                    ) : (
-                                                        <span 
-                                                            className={styles.dateText} 
-                                                            onClick={() => {
-                                                                setEditDate(log.executionDate.split('T')[0]);
-                                                                setEditingLogId(logId);
-                                                            }}
-                                                            title="Clic para cambiar la fecha"
-                                                        >
-                                                            {new Date(log.executionDate).toLocaleDateString('es-ES')}
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td><strong>{log.itemName}</strong></td>
-                                                <td>
-                                                    <span className={styles.badge} style={{ backgroundColor: getTypeColor(log.itemType) }}>
-                                                        {getTypeName(log.itemType)}
-                                                    </span>
-                                                </td>
-                                                <td style={{ color: getTypeColor(log.itemType), fontWeight: 'bold' }}>
-                                                    {log.currency} {log.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                                                </td>
-                                                <td>
-                                                    <button className={styles.deleteBtn} onClick={() => handleDelete(logId)}>
-                                                        Eliminar
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                );
-            })}
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 }
