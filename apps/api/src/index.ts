@@ -9,6 +9,7 @@ import accountsRouter from './routes/accounts';
 import budgetsRouter from './routes/budgets';
 import transactionsRouter from './routes/transactions';
 import authRouter from './routes/auth';
+import executionsRouter from './routes/executions';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -39,3 +40,4 @@ app.use('/api/auth', authRouter);
 app.use('/api/accounts', accountsRouter);
 app.use('/api/budgets', budgetsRouter);
 app.use('/api/transactions', transactionsRouter);
+app.use('/api/executions', executionsRouter);

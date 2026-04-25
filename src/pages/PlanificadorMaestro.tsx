@@ -7,6 +7,7 @@ import DataExchangeModal from '../components/modals/DataExchangeModal';
 import { AccountsAPI } from '../features/accounts/accounts.api';
 import { BudgetsAPI } from '../features/budgets/budgets.api';
 import { TransactionsAPI } from '../features/transactions/Transactions.api';
+import { ExecutionsAPI } from '../features/executions/executions.api';
 import { useAuth } from '../app/providers/AuthProvider';
 import styles from './PlanificadorMaestro.module.css';
 
@@ -35,6 +36,7 @@ const PlanificadorMaestro: React.FC = () => {
     const [isDataExchangeOpen, setIsDataExchangeOpen] = useState(false);
     const [actionsOpen, setActionsOpen] = useState(false);
     const [saving, setSaving] = useState(false);
+    const originalExecutionsRef = useRef<Record<string, boolean>>({});
     const [actualSpentThisMonth, setActualSpentThisMonth] = useState(0);
     const { user } = useAuth();
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -77,6 +79,16 @@ const PlanificadorMaestro: React.FC = () => {
 
                 if (income.id && typeof income.id === 'string' && income.id.length === 24) {
                     await AccountsAPI.update(income.id, accountData);
+                    if (!originalExecutionsRef.current[income.id] && income.isExecuted) {
+                        await ExecutionsAPI.create({ 
+                            itemId: income.id, 
+                            itemName: income.name || 'Ingreso S/N',
+                            itemType: 'income',
+                            amount: Number(income.amount || 0),
+                            currency: income.itemCurrency || currency,
+                            executionDate: new Date().toISOString()
+                        }).catch(e => console.error(e));
+                    }
                 } else {
                     await AccountsAPI.create(accountData as any);
                 }
@@ -107,6 +119,16 @@ const PlanificadorMaestro: React.FC = () => {
 
                 if (expense.id && typeof expense.id === 'string' && expense.id.length === 24) {
                     await BudgetsAPI.update(expense.id, budgetData);
+                    if (!originalExecutionsRef.current[expense.id] && expense.isExecuted) {
+                        await ExecutionsAPI.create({ 
+                            itemId: expense.id, 
+                            itemName: expense.name || 'Gasto S/N',
+                            itemType: 'fixed_expense',
+                            amount: Number(expense.amount || 0),
+                            currency: expense.itemCurrency || currency,
+                            executionDate: new Date().toISOString()
+                        }).catch(e => console.error(e));
+                    }
                 } else {
                     await BudgetsAPI.create(budgetData as any);
                 }
@@ -152,6 +174,16 @@ const PlanificadorMaestro: React.FC = () => {
 
                 if (item.id && typeof item.id === 'string' && item.id.length === 24) {
                     await TransactionsAPI.update(item.id, trxData);
+                    if (!originalExecutionsRef.current[item.id] && item.isExecuted) {
+                        await ExecutionsAPI.create({ 
+                            itemId: item.id, 
+                            itemName: item.name || 'Gasto Variable',
+                            itemType: 'variable_expense',
+                            amount: Number(item.amount || 0),
+                            currency: item.itemCurrency || currency,
+                            executionDate: new Date().toISOString()
+                        }).catch(e => console.error(e));
+                    }
                 } else {
                     await TransactionsAPI.create(trxData);
                 }
@@ -175,6 +207,16 @@ const PlanificadorMaestro: React.FC = () => {
 
                 if (item.id && typeof item.id === 'string' && item.id.length === 24) {
                     await TransactionsAPI.update(item.id, trxData);
+                    if (!originalExecutionsRef.current[item.id] && item.isExecuted) {
+                        await ExecutionsAPI.create({ 
+                            itemId: item.id, 
+                            itemName: item.name || 'Ahorro',
+                            itemType: 'saving',
+                            amount: Number(item.amount || 0),
+                            currency: item.itemCurrency || currency,
+                            executionDate: new Date().toISOString()
+                        }).catch(e => console.error(e));
+                    }
                 } else {
                     await TransactionsAPI.create(trxData);
                 }
@@ -202,17 +244,6 @@ const PlanificadorMaestro: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        /* 
-        fetch('https://api.exchangerate-api.com/v4/latest/USD')
-            .then(res => res.json())
-            .then(data => {
-                if (data?.rates?.DOP) {
-                    setExchangeRate(data.rates.DOP);
-                }
-            })
-            .catch(err => console.error("Error cargando tasa de cambio:", err));
-        */
-
         const loadData = async () => {
             if (!user) return; 
             try {
@@ -250,12 +281,9 @@ const PlanificadorMaestro: React.FC = () => {
                 }
 
                 if (transactions.length > 0) {
-                    const variableT = transactions.filter((t: any) => t.type !== 'savings');
-                    const savingsT = transactions.filter((t: any) => t.type === 'savings');
-
-                    setVariableExpenses(variableT.map((t: any) => ({
+                    setVariableExpenses(transactions.filter((t: any) => t && t.type === 'expense').map((t: any) => ({
                         id: t.id || t._id,
-                        name: t.description || t.category || t.name || 'Gasto',
+                        name: t.description || 'Gasto Variable',
                         amount: Number(t.amount || 0),
                         periodicity: dbToUiPeriod(t.periodicity) as any,
                         itemCurrency: (t.currency as 'USD' | 'DOP') || 'DOP',
@@ -264,9 +292,9 @@ const PlanificadorMaestro: React.FC = () => {
                         isCustom: true
                     })));
 
-                    setSavings(savingsT.map((t: any) => ({
+                    setSavings(transactions.filter((t: any) => t && t.type === 'savings').map((t: any) => ({
                         id: t.id || t._id,
-                        name: t.description || t.category || t.name || 'Ahorro',
+                        name: t.description || 'Ahorro',
                         amount: Number(t.amount || 0),
                         periodicity: dbToUiPeriod(t.periodicity) as any,
                         itemCurrency: (t.currency as 'USD' | 'DOP') || 'DOP',
@@ -275,6 +303,16 @@ const PlanificadorMaestro: React.FC = () => {
                         isCustom: true
                     })));
                 }
+
+                // Guardar estado inicial de ejecuciones
+                const origExecs: Record<string, boolean> = {};
+                
+                if (Array.isArray(accounts)) accounts.forEach((a: any) => origExecs[a.id || a._id] = !!a.isExecuted);
+                if (Array.isArray(budgets)) budgets.forEach((b: any) => origExecs[b.id || b._id] = !!b.isExecuted);
+                if (transactions.length > 0) transactions.forEach((t: any) => origExecs[t.id || t._id] = !!t.isExecuted);
+                
+                originalExecutionsRef.current = origExecs;
+
             } catch (err) {
                 console.error("No se pudo cargar la data guardada", err);
             }

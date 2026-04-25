@@ -42,6 +42,9 @@ export default function Navbar() {
       </Link>
 
       <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <Link to="/historial" className={styles.navLink} style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem' }}>
+           📜 Historial
+        </Link>
         <Link to="/plan-maestro" className={styles.navLink} style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem' }}>
            🚀 Plan Maestro
         </Link>

@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 import PlanificadorMaestro from '../pages/PlanificadorMaestro';
+import Historial from '../pages/Historial';
 import ProtectedRoute from './providers/ProtectedRoute';
 import Dashboard from '../pages/Dashboard';
 import AnimatedLayout from '../components/layout/AnimatedLayout';
@@ -20,6 +21,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <AnimatedLayout><Dashboard /></AnimatedLayout>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/historial',
+    element: (
+      <ProtectedRoute>
+        <AnimatedLayout><Historial /></AnimatedLayout>
       </ProtectedRoute>
     ),
   },
