@@ -9,19 +9,11 @@ import AnimatedLayout from '../components/layout/AnimatedLayout';
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: (
-      <ProtectedRoute>
-        <AnimatedLayout><Dashboard /></AnimatedLayout>
-      </ProtectedRoute>
-    ),
+    element: <AnimatedLayout><Dashboard /></AnimatedLayout>,
   },
   {
     path: '/plan-maestro',
-    element: (
-      <ProtectedRoute>
-        <AnimatedLayout><PlanificadorMaestro /></AnimatedLayout>
-      </ProtectedRoute>
-    ),
+    element: <AnimatedLayout><PlanificadorMaestro /></AnimatedLayout>,
   },
   {
     path: '/transactions',
