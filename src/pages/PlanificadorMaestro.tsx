@@ -86,7 +86,7 @@ const PlanificadorMaestro: React.FC = () => {
                             itemType: 'income',
                             amount: Number(income.amount || 0),
                             currency: income.itemCurrency || currency,
-                            executionDate: new Date().toISOString()
+                            executionDate: income.executionDate || new Date().toISOString()
                         }).catch(e => console.error(e));
                     }
                 } else {
@@ -126,7 +126,7 @@ const PlanificadorMaestro: React.FC = () => {
                             itemType: 'fixed_expense',
                             amount: Number(expense.amount || 0),
                             currency: expense.itemCurrency || currency,
-                            executionDate: new Date().toISOString()
+                            executionDate: expense.executionDate || new Date().toISOString()
                         }).catch(e => console.error(e));
                     }
                 } else {
@@ -181,7 +181,7 @@ const PlanificadorMaestro: React.FC = () => {
                             itemType: 'variable_expense',
                             amount: Number(item.amount || 0),
                             currency: item.itemCurrency || currency,
-                            executionDate: new Date().toISOString()
+                            executionDate: item.executionDate || new Date().toISOString()
                         }).catch(e => console.error(e));
                     }
                 } else {
@@ -214,7 +214,7 @@ const PlanificadorMaestro: React.FC = () => {
                             itemType: 'saving',
                             amount: Number(item.amount || 0),
                             currency: item.itemCurrency || currency,
-                            executionDate: new Date().toISOString()
+                            executionDate: item.executionDate || new Date().toISOString()
                         }).catch(e => console.error(e));
                     }
                 } else {
@@ -247,11 +247,22 @@ const PlanificadorMaestro: React.FC = () => {
         const loadData = async () => {
             if (!user) return; 
             try {
-                const [accounts, budgets, transactions] = await Promise.all([
+                const [accounts, budgets, transactions, executions] = await Promise.all([
                     AccountsAPI.list(),
                     BudgetsAPI.list(),
-                    TransactionsAPI.list()
+                    TransactionsAPI.list(),
+                    ExecutionsAPI.list().catch(() => []) // Catch in case of error
                 ]);
+
+                // Crear mapa de executions para rapido acceso
+                const execsMap = new Map<string, any>();
+                if (Array.isArray(executions)) {
+                    executions.forEach((e: any) => {
+                        if (e && e.itemId) {
+                            execsMap.set(e.itemId, e);
+                        }
+                    });
+                }
 
                 if (Array.isArray(accounts)) {
                     const activeAccounts = accounts.filter((a: any) => a && a.isActive !== false);
@@ -263,6 +274,7 @@ const PlanificadorMaestro: React.FC = () => {
                         itemCurrency: (a.currency as 'USD' | 'DOP') || 'DOP',
                         payDay: a.payDay,
                         isExecuted: a.isExecuted,
+                        executionDate: execsMap.get(a.id || a._id)?.executionDate,
                         isCustom: true
                     })));
                 }
@@ -276,6 +288,7 @@ const PlanificadorMaestro: React.FC = () => {
                         itemCurrency: (b.currency as 'USD' | 'DOP') || 'DOP',
                         payDay: b.payDay,
                         isExecuted: b.isExecuted,
+                        executionDate: execsMap.get(b.id || b._id)?.executionDate,
                         isCustom: true
                     })));
                 }
@@ -288,7 +301,9 @@ const PlanificadorMaestro: React.FC = () => {
                         periodicity: dbToUiPeriod(t.periodicity) as any,
                         itemCurrency: (t.currency as 'USD' | 'DOP') || 'DOP',
                         payDay: t.payDay,
+                        payDay: t.payDay,
                         isExecuted: t.isExecuted,
+                        executionDate: execsMap.get(t.id || t._id)?.executionDate,
                         isCustom: true
                     })));
 
@@ -299,7 +314,9 @@ const PlanificadorMaestro: React.FC = () => {
                         periodicity: dbToUiPeriod(t.periodicity) as any,
                         itemCurrency: (t.currency as 'USD' | 'DOP') || 'DOP',
                         payDay: t.payDay,
+                        payDay: t.payDay,
                         isExecuted: t.isExecuted,
+                        executionDate: execsMap.get(t.id || t._id)?.executionDate,
                         isCustom: true
                     })));
                 }

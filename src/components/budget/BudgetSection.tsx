@@ -12,6 +12,7 @@ export interface BudgetItem {
     itemCurrency?: 'USD' | 'DOP';
     payDay?: number;
     isExecuted?: boolean;
+    executionDate?: string;
 }
 
 interface BudgetSectionProps {
@@ -192,12 +193,14 @@ const BudgetSection: React.FC<BudgetSectionProps> = ({
                                     payDay={item.payDay}
                                     isExecuted={item.isExecuted}
                                     isCustom={item.isCustom}
+                                    executionDate={item.executionDate}
                                     onNameChange={item.isCustom ? (val) => handleItemChange(item.id, 'name', val) : undefined}
                                     onAmountChange={(val: number) => handleItemChange(item.id, 'amount', val)}
                                     onPeriodicityChange={(val: Periodicity) => handleItemChange(item.id, 'periodicity', val)}
                                     onItemCurrencyChange={(val: 'USD' | 'DOP') => handleItemChange(item.id, 'itemCurrency', val)}
                                     onPayDayChange={(val: number | undefined) => handleItemChange(item.id, 'payDay', val)}
                                     onIsExecutedChange={(val: boolean) => handleItemChange(item.id, 'isExecuted', val)}
+                                    onExecutionDateChange={(val: string) => handleItemChange(item.id, 'executionDate', val)}
                                     onDelete={() => handleDelete(item.id)}
                                 />
                             ))}

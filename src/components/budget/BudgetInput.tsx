@@ -17,6 +17,8 @@ interface BudgetInputProps {
     onItemCurrencyChange: (currency: 'USD' | 'DOP') => void;
     onPayDayChange: (day: number | undefined) => void;
     onIsExecutedChange?: (isExecuted: boolean) => void;
+    executionDate?: string;
+    onExecutionDateChange?: (date: string) => void;
     onDelete?: () => void;
 }
 
@@ -34,6 +36,8 @@ const BudgetInput: React.FC<BudgetInputProps> = ({
     onItemCurrencyChange,
     onPayDayChange,
     onIsExecutedChange,
+    executionDate,
+    onExecutionDateChange,
     onDelete,
 }) => {
     const today = new Date().getDate();
@@ -75,6 +79,15 @@ const BudgetInput: React.FC<BudgetInputProps> = ({
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <label className={styles.label}>{label}</label>
                         </div>
+                    )}
+                    {isExecuted && onExecutionDateChange && (
+                        <input 
+                            type="date"
+                            value={executionDate ? executionDate.split('T')[0] : ''}
+                            onChange={(e) => onExecutionDateChange(e.target.value ? new Date(e.target.value).toISOString() : '')}
+                            className={styles.executionDateInput}
+                            title="Fecha exacta de la transacción"
+                        />
                     )}
                 </div>
                 <div className={styles.inputs}>
