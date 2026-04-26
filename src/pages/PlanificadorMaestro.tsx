@@ -36,7 +36,7 @@ const PlanificadorMaestro: React.FC = () => {
     const [isDataExchangeOpen, setIsDataExchangeOpen] = useState(false);
     const [actionsOpen, setActionsOpen] = useState(false);
     const [saving, setSaving] = useState(false);
-    const originalExecutionsRef = useRef<Record<string, boolean>>({});
+    const originalExecutionsRef = useRef<Record<string, any>>({});
     const [actualSpentThisMonth, setActualSpentThisMonth] = useState(0);
     const { user } = useAuth();
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -46,6 +46,29 @@ const PlanificadorMaestro: React.FC = () => {
         if (!user) return;
         setSaving(true);
         setActionsOpen(false);
+
+        const syncExecution = async (item: any, itemType: string, defaultName: string) => {
+            if (item.isExecuted) {
+                const existingExec = originalExecutionsRef.current[item.id];
+                const newDate = item.executionDate || new Date().toISOString();
+                
+                if (!existingExec) {
+                    await ExecutionsAPI.create({ 
+                        itemId: item.id, 
+                        itemName: item.name || defaultName,
+                        itemType: itemType,
+                        amount: Number(item.amount || 0),
+                        currency: item.itemCurrency || currency,
+                        executionDate: newDate
+                    }).catch(e => console.error(e));
+                } else if (existingExec.executionDate !== newDate) {
+                    const execId = existingExec.id || existingExec._id;
+                    if (execId) {
+                        await ExecutionsAPI.update(execId, { executionDate: newDate }).catch(e => console.error(e));
+                    }
+                }
+            }
+        };
 
         try {
             // 0. Obtener estado actual de la DB para detectar borrados
@@ -79,16 +102,7 @@ const PlanificadorMaestro: React.FC = () => {
 
                 if (income.id && typeof income.id === 'string' && income.id.length === 24) {
                     await AccountsAPI.update(income.id, accountData);
-                    if (!originalExecutionsRef.current[income.id] && income.isExecuted) {
-                        await ExecutionsAPI.create({ 
-                            itemId: income.id, 
-                            itemName: income.name || 'Ingreso S/N',
-                            itemType: 'income',
-                            amount: Number(income.amount || 0),
-                            currency: income.itemCurrency || currency,
-                            executionDate: income.executionDate || new Date().toISOString()
-                        }).catch(e => console.error(e));
-                    }
+                    await syncExecution(income, 'income', 'Ingreso S/N');
                 } else {
                     await AccountsAPI.create(accountData as any);
                 }
@@ -119,16 +133,7 @@ const PlanificadorMaestro: React.FC = () => {
 
                 if (expense.id && typeof expense.id === 'string' && expense.id.length === 24) {
                     await BudgetsAPI.update(expense.id, budgetData);
-                    if (!originalExecutionsRef.current[expense.id] && expense.isExecuted) {
-                        await ExecutionsAPI.create({ 
-                            itemId: expense.id, 
-                            itemName: expense.name || 'Gasto S/N',
-                            itemType: 'fixed_expense',
-                            amount: Number(expense.amount || 0),
-                            currency: expense.itemCurrency || currency,
-                            executionDate: expense.executionDate || new Date().toISOString()
-                        }).catch(e => console.error(e));
-                    }
+                    await syncExecution(expense, 'fixed_expense', 'Gasto S/N');
                 } else {
                     await BudgetsAPI.create(budgetData as any);
                 }
@@ -174,16 +179,7 @@ const PlanificadorMaestro: React.FC = () => {
 
                 if (item.id && typeof item.id === 'string' && item.id.length === 24) {
                     await TransactionsAPI.update(item.id, trxData);
-                    if (!originalExecutionsRef.current[item.id] && item.isExecuted) {
-                        await ExecutionsAPI.create({ 
-                            itemId: item.id, 
-                            itemName: item.name || 'Gasto Variable',
-                            itemType: 'variable_expense',
-                            amount: Number(item.amount || 0),
-                            currency: item.itemCurrency || currency,
-                            executionDate: item.executionDate || new Date().toISOString()
-                        }).catch(e => console.error(e));
-                    }
+                    await syncExecution(item, 'variable_expense', 'Gasto Variable');
                 } else {
                     await TransactionsAPI.create(trxData);
                 }
@@ -207,16 +203,7 @@ const PlanificadorMaestro: React.FC = () => {
 
                 if (item.id && typeof item.id === 'string' && item.id.length === 24) {
                     await TransactionsAPI.update(item.id, trxData);
-                    if (!originalExecutionsRef.current[item.id] && item.isExecuted) {
-                        await ExecutionsAPI.create({ 
-                            itemId: item.id, 
-                            itemName: item.name || 'Ahorro',
-                            itemType: 'saving',
-                            amount: Number(item.amount || 0),
-                            currency: item.itemCurrency || currency,
-                            executionDate: item.executionDate || new Date().toISOString()
-                        }).catch(e => console.error(e));
-                    }
+                    await syncExecution(item, 'saving', 'Ahorro');
                 } else {
                     await TransactionsAPI.create(trxData);
                 }
@@ -260,6 +247,7 @@ const PlanificadorMaestro: React.FC = () => {
                     executions.forEach((e: any) => {
                         if (e && e.itemId) {
                             execsMap.set(e.itemId, e);
+                            originalExecutionsRef.current[e.itemId] = e;
                         }
                     });
                 }
