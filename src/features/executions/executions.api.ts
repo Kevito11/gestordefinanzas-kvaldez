@@ -8,6 +8,7 @@ export interface ExecutionLog {
   itemId: string;
   itemName: string;
   itemType: 'income' | 'fixed_expense' | 'variable_expense' | 'saving';
+  action?: 'created' | 'deleted' | 'executed';
   amount: number;
   currency: string;
   executionDate: string;

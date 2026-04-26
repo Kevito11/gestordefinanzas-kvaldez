@@ -77,6 +77,9 @@ const HistoryOverlay: React.FC<HistoryOverlayProps> = ({ isOpen, onClose }) => {
                                                 <span className={styles.date}>
                                                     {new Date(log.executionDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
                                                 </span>
+                                                <span className={styles.actionText}>
+                                                    {log.action === 'created' ? 'Agregado' : log.action === 'deleted' ? 'Eliminado' : 'Efectuado'}
+                                                </span>
                                                 <span className={styles.name}>{log.itemName}</span>
                                             </div>
                                             <div className={styles.right} style={{ color: getTypeColor(log.itemType) }}>

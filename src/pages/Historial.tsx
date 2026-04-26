@@ -118,6 +118,9 @@ export default function Historial() {
                                         <span className={styles.typeTag} style={{ color: getTypeColor(log.itemType) }}>
                                             • {getTypeName(log.itemType)}
                                         </span>
+                                        <span className={`${styles.actionTag} ${styles[log.action || 'executed']}`}>
+                                            {log.action === 'created' ? 'Agregado' : log.action === 'deleted' ? 'Eliminado' : 'Efectuado'}
+                                        </span>
                                     </div>
                                     <div className={styles.itemName}>{log.itemName}</div>
                                 </div>

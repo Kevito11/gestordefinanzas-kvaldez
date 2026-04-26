@@ -49,6 +49,22 @@ const PlanificadorMaestro: React.FC = () => {
         setSaving(true);
         setActionsOpen(false);
 
+        const logActivity = async (item: any, itemType: string, action: 'created' | 'deleted' | 'executed', defaultName: string) => {
+            try {
+                await ExecutionsAPI.create({
+                    itemId: item.id || item._id || '000000000000000000000000',
+                    itemName: item.name || item.description || defaultName,
+                    itemType: itemType as any,
+                    action,
+                    amount: Number(item.amount || item.salary || 0),
+                    currency: item.itemCurrency || item.currency || currency,
+                    executionDate: new Date().toISOString()
+                });
+            } catch (e) {
+                console.error(`Error logging ${action}`, e);
+            }
+        };
+
         const syncExecution = async (item: any, itemType: string, defaultName: string) => {
             if (item.isExecuted) {
                 const existingExec = originalExecutionsRef.current[item.id];
@@ -58,7 +74,8 @@ const PlanificadorMaestro: React.FC = () => {
                     await ExecutionsAPI.create({ 
                         itemId: item.id, 
                         itemName: item.name || defaultName,
-                        itemType: itemType,
+                        itemType: itemType as any,
+                        action: 'executed',
                         amount: Number(item.amount || 0),
                         currency: item.itemCurrency || currency,
                         executionDate: newDate
@@ -87,6 +104,7 @@ const PlanificadorMaestro: React.FC = () => {
                 const dbId = dbAcc.id || (dbAcc as any)._id;
                 if (dbId && typeof dbId === 'string' && !incomeIdsInUI.has(dbId)) {
                     await AccountsAPI.delete(dbId);
+                    await logActivity(dbAcc, 'income', 'deleted', 'Ingreso S/N');
                 }
             }
 
@@ -106,7 +124,8 @@ const PlanificadorMaestro: React.FC = () => {
                     await AccountsAPI.update(income.id, accountData);
                     await syncExecution(income, 'income', 'Ingreso S/N');
                 } else {
-                    await AccountsAPI.create(accountData as any);
+                    const res = await AccountsAPI.create(accountData as any);
+                    await logActivity(res, 'income', 'created', 'Ingreso S/N');
                 }
             }
 
@@ -117,6 +136,7 @@ const PlanificadorMaestro: React.FC = () => {
                 const dbId = dbBud.id || (dbBud as any)._id;
                 if (dbId && typeof dbId === 'string' && !expenseIdsInUI.has(dbId)) {
                     await BudgetsAPI.delete(dbId);
+                    await logActivity(dbBud, 'fixed_expense', 'deleted', 'Gasto S/N');
                 }
             }
 
@@ -137,7 +157,8 @@ const PlanificadorMaestro: React.FC = () => {
                     await BudgetsAPI.update(expense.id, budgetData);
                     await syncExecution(expense, 'fixed_expense', 'Gasto S/N');
                 } else {
-                    await BudgetsAPI.create(budgetData as any);
+                    const res = await BudgetsAPI.create(budgetData as any);
+                    await logActivity(res, 'fixed_expense', 'created', 'Gasto S/N');
                 }
             }
 
@@ -150,6 +171,7 @@ const PlanificadorMaestro: React.FC = () => {
                 const dbId = dbTrx.id || (dbTrx as any)._id;
                 if (dbId && typeof dbId === 'string' && !trxIdsInUI.has(dbId)) {
                     await TransactionsAPI.delete(dbId);
+                    await logActivity(dbTrx, dbTrx.type === 'savings' ? 'saving' : 'variable_expense', 'deleted', 'Transacción S/N');
                 }
             }
 
@@ -183,7 +205,8 @@ const PlanificadorMaestro: React.FC = () => {
                     await TransactionsAPI.update(item.id, trxData);
                     await syncExecution(item, 'variable_expense', 'Gasto Variable');
                 } else {
-                    await TransactionsAPI.create(trxData);
+                    const res = await TransactionsAPI.create(trxData);
+                    await logActivity(res, 'variable_expense', 'created', 'Gasto Variable');
                 }
             }
 
@@ -207,7 +230,8 @@ const PlanificadorMaestro: React.FC = () => {
                     await TransactionsAPI.update(item.id, trxData);
                     await syncExecution(item, 'saving', 'Ahorro');
                 } else {
-                    await TransactionsAPI.create(trxData);
+                    const res = await TransactionsAPI.create(trxData);
+                    await logActivity(res, 'saving', 'created', 'Ahorro');
                 }
             }
 
