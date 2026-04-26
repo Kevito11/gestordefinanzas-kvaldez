@@ -137,6 +137,32 @@
   transform: translateY(-1px);
 }
 
+.saveIconButton {
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+}
+
+.saveIconButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(110%);
+  box-shadow: 0 6px 12px -2px rgba(79, 70, 229, 0.3);
+}
+
+.saveIconButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .actionsArea {
   display: flex;
   flex-wrap: wrap;

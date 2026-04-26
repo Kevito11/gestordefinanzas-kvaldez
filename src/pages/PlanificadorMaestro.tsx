@@ -507,6 +507,17 @@ const PlanificadorMaestro: React.FC = () => {
                             📜 Historial
                         </button>
                     </div>
+
+                    <div className={styles.controlGroup}>
+                        <button 
+                            className={styles.saveIconButton}
+                            onClick={handleSavePlan}
+                            disabled={saving}
+                            title={saving ? 'Guardando...' : 'Guardar Planificación'}
+                        >
+                            {saving ? '⏳' : '💾'}
+                        </button>
+                    </div>
                     
                     <div className={styles.actionsArea}>
                         <div className={styles.dropdownContainer} ref={dropdownRef}>
@@ -527,19 +538,7 @@ const PlanificadorMaestro: React.FC = () => {
                                         className={styles.dropdownMenu}
                                         style={{ transformOrigin: 'top right' }}
                                     >
-                                        {user ? (
-                                            <button 
-                                                onClick={handleSavePlan} 
-                                                className={`${styles.dropdownItem} ${styles.saveItem}`}
-                                                disabled={saving}
-                                            >
-                                                <span>💾</span> {saving ? 'Guardando...' : 'Guardar Planificación'}
-                                            </button>
-                                        ) : (
-                                            <Link to="/login" className={`${styles.dropdownItem} ${styles.saveItem}`} style={{ opacity: 0.7 }}>
-                                                <span>🔑</span> Logueate p/ Guardar
-                                            </Link>
-                                        )}
+                                        {/* SAVING IS NOW HANDLED BY THE ICON BUTTON IN THE MAIN BAR */}
 
                                         <div className={styles.divider}></div>
 
