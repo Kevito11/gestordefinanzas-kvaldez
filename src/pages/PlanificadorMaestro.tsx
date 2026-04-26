@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import BudgetSection, { type BudgetItem } from '../components/budget/BudgetSection';
 import BudgetSummary from '../components/budget/BudgetSummary';
+import HistoryOverlay from '../components/budget/HistoryOverlay';
 import DataExchangeModal from '../components/modals/DataExchangeModal';
 import { AccountsAPI } from '../features/accounts/accounts.api';
 import { BudgetsAPI } from '../features/budgets/budgets.api';
@@ -36,6 +37,7 @@ const PlanificadorMaestro: React.FC = () => {
     const [isDataExchangeOpen, setIsDataExchangeOpen] = useState(false);
     const [actionsOpen, setActionsOpen] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
     const originalExecutionsRef = useRef<Record<string, any>>({});
     const [actualSpentThisMonth, setActualSpentThisMonth] = useState(0);
     const { user } = useAuth();
@@ -472,6 +474,15 @@ const PlanificadorMaestro: React.FC = () => {
                             <option value="puntual">Puntual (Ahora)</option>
                         </select>
                     </div>
+
+                    <div className={styles.controlGroup}>
+                        <button 
+                            className={styles.historyBtn}
+                            onClick={() => setIsHistoryOpen(true)}
+                        >
+                            📜 Historial
+                        </button>
+                    </div>
                     
                     <div className={styles.actionsArea}>
                         <div className={styles.dropdownContainer} ref={dropdownRef}>
@@ -510,9 +521,6 @@ const PlanificadorMaestro: React.FC = () => {
 
                                         <Link to="/" className={styles.dropdownItem}>
                                             <span>🏠</span> Inicio
-                                        </Link>
-                                        <Link to="/transactions" className={styles.dropdownItem}>
-                                            <span>💸</span> Historial
                                         </Link>
                                         <button onClick={() => {
                                             handleClearAll();
@@ -612,6 +620,10 @@ const PlanificadorMaestro: React.FC = () => {
                 </div>
             </div>
 
+            <HistoryOverlay 
+                isOpen={isHistoryOpen} 
+                onClose={() => setIsHistoryOpen(false)} 
+            />
             <DataExchangeModal 
                 isOpen={isDataExchangeOpen} 
                 onClose={() => setIsDataExchangeOpen(false)} 
