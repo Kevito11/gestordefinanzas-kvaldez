@@ -36,15 +36,7 @@ const HistoryOverlay: React.FC<HistoryOverlayProps> = ({ isOpen, onClose }) => {
         }
     };
 
-    const getTypeName = (type: string) => {
-        switch (type) {
-            case 'income': return 'Ingreso';
-            case 'saving': return 'Ahorro';
-            case 'fixed_expense': return 'Gasto Fijo';
-            case 'variable_expense': return 'Gasto Variable';
-            default: return type;
-        }
-    };
+
 
     const sortedLogs = [...logs].sort((a, b) => new Date(b.executionDate).getTime() - new Date(a.executionDate).getTime()).slice(0, 10);
 

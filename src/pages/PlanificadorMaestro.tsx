@@ -315,7 +315,6 @@ const PlanificadorMaestro: React.FC = () => {
                         periodicity: dbToUiPeriod(t.periodicity) as any,
                         itemCurrency: (t.currency as 'USD' | 'DOP') || 'DOP',
                         payDay: t.payDay,
-                        payDay: t.payDay,
                         isExecuted: t.isExecuted,
                         executionDate: execsMap.get(t.id || t._id)?.executionDate,
                         isCustom: true
@@ -327,7 +326,6 @@ const PlanificadorMaestro: React.FC = () => {
                         amount: Number(t.amount || 0),
                         periodicity: dbToUiPeriod(t.periodicity) as any,
                         itemCurrency: (t.currency as 'USD' | 'DOP') || 'DOP',
-                        payDay: t.payDay,
                         payDay: t.payDay,
                         isExecuted: t.isExecuted,
                         executionDate: execsMap.get(t.id || t._id)?.executionDate,
