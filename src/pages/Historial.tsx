@@ -83,68 +83,56 @@ export default function Historial() {
                     No hay ejecuciones registradas. Marca algunos conceptos como efectuados en el Planificador Maestro.
                 </div>
             ) : (
-                <div className={styles.tableWrapper}>
-                    <table className={styles.table}>
-                        <thead>
-                            <tr>
-                                <th>Fecha Exacta</th>
-                                <th>Descripción</th>
-                                <th>Tipo</th>
-                                <th>Monto</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {sortedLogs.map(log => {
-                                const logId = log.id || log._id || '';
-                                const isEditing = editingLogId === logId;
+                <div className={styles.list}>
+                    {sortedLogs.map(log => {
+                        const logId = log.id || log._id || '';
+                        const isEditing = editingLogId === logId;
 
-                                return (
-                                    <tr key={logId}>
-                                        <td>
-                                            {isEditing ? (
-                                                <div className={styles.editDateGroup}>
-                                                    <input 
-                                                        type="date" 
-                                                        value={editDate}
-                                                        onChange={(e) => setEditDate(e.target.value)}
-                                                        className={styles.dateInput}
-                                                    />
-                                                    <button className={styles.saveBtn} onClick={() => handleSaveDate(logId)}>OK</button>
-                                                    <button className={styles.cancelBtn} onClick={() => setEditingLogId(null)}>X</button>
-                                                </div>
-                                            ) : (
-                                                <span 
-                                                    className={styles.dateText} 
-                                                    onClick={() => {
-                                                        setEditDate(log.executionDate.split('T')[0]);
-                                                        setEditingLogId(logId);
-                                                    }}
-                                                    title="Clic para cambiar la fecha"
-                                                >
-                                                    {new Date(log.executionDate).toLocaleDateString('es-ES')}
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td><strong>{log.itemName}</strong></td>
-                                        <td>
-                                            <span className={styles.badge} style={{ backgroundColor: getTypeColor(log.itemType) }}>
-                                                {getTypeName(log.itemType)}
+                        return (
+                            <div key={logId} className={styles.listItem}>
+                                <div className={styles.itemInfo}>
+                                    <div className={styles.dateAndType}>
+                                        {isEditing ? (
+                                            <div className={styles.editDateGroup}>
+                                                <input 
+                                                    type="date" 
+                                                    value={editDate}
+                                                    onChange={(e) => setEditDate(e.target.value)}
+                                                    className={styles.dateInput}
+                                                />
+                                                <button className={styles.saveBtn} onClick={() => handleSaveDate(logId)}>OK</button>
+                                                <button className={styles.cancelBtn} onClick={() => setEditingLogId(null)}>X</button>
+                                            </div>
+                                        ) : (
+                                            <span 
+                                                className={styles.dateText} 
+                                                onClick={() => {
+                                                    setEditDate(log.executionDate.split('T')[0]);
+                                                    setEditingLogId(logId);
+                                                }}
+                                                title="Clic para cambiar la fecha"
+                                            >
+                                                {new Date(log.executionDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
                                             </span>
-                                        </td>
-                                        <td style={{ color: getTypeColor(log.itemType), fontWeight: 'bold' }}>
-                                            {log.currency} {log.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                                        </td>
-                                        <td>
-                                            <button className={styles.deleteBtn} onClick={() => handleDelete(logId)}>
-                                                Eliminar
-                                            </button>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                                        )}
+                                        <span className={styles.typeTag} style={{ color: getTypeColor(log.itemType) }}>
+                                            • {getTypeName(log.itemType)}
+                                        </span>
+                                    </div>
+                                    <div className={styles.itemName}>{log.itemName}</div>
+                                </div>
+                                
+                                <div className={styles.itemRight}>
+                                    <div className={styles.itemAmount} style={{ color: getTypeColor(log.itemType) }}>
+                                        {log.itemType === 'income' ? '+' : '-'} {log.currency} {log.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                    </div>
+                                    <button className={styles.iconDeleteBtn} onClick={() => handleDelete(logId)} title="Eliminar registro">
+                                        🗑️
+                                    </button>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             )}
         </div>
