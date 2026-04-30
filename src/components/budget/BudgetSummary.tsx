@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import styles from './BudgetSection.module.css'; 
 import { useAuth } from '../../app/providers/AuthProvider';
 import { Link } from 'react-router-dom';
@@ -9,6 +10,7 @@ interface BudgetSummaryProps {
     totalSavings: number; 
     currency: 'USD' | 'DOP';
     exchangeRate?: number;
+    setExchangeRate?: (rate: number) => void;
     timeframe: 'mensual' | 'quincenal' | 'puntual' | 'original';
     budgetItems?: any[]; 
 }
@@ -20,10 +22,13 @@ const BudgetSummary: React.FC<BudgetSummaryProps> = ({
     totalSavings = 0, 
     currency, 
     exchangeRate = 1,
+    setExchangeRate,
     timeframe,
     budgetItems = []
 }) => {
     const { user } = useAuth();
+    const [isEditingRate, setIsEditingRate] = useState(false);
+    const [tempRate, setTempRate] = useState(exchangeRate.toString());
     const today = new Date().getDate();
     const balance = totalIncome - totalExpenses - totalSavings;
 
@@ -157,9 +162,54 @@ const BudgetSummary: React.FC<BudgetSummaryProps> = ({
                     padding: '8px',
                     background: '#ebf5fb',
                     borderRadius: '6px',
-                    border: '1px solid #d6eaf8'
+                    border: '1px solid #d6eaf8',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '5px'
                 }}>
-                    Tasa de Cambio Actual: <strong>$1 USD = RD$ {exchangeRate.toFixed(2)}</strong>
+                    {isEditingRate ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <span style={{ fontWeight: 'bold' }}>$1 USD = RD$</span>
+                            <input
+                                type="number"
+                                value={tempRate}
+                                onChange={(e) => setTempRate(e.target.value)}
+                                style={{ width: '80px', padding: '2px 5px', borderRadius: '4px', border: '1px solid #3498db' }}
+                                autoFocus
+                                step="0.01"
+                            />
+                            <button 
+                                onClick={() => {
+                                    if (setExchangeRate) setExchangeRate(Number(tempRate));
+                                    setIsEditingRate(false);
+                                }}
+                                style={{ background: '#2ecc71', color: 'white', border: 'none', borderRadius: '4px', padding: '3px 8px', cursor: 'pointer' }}
+                            >
+                                ✓
+                            </button>
+                        </div>
+                    ) : (
+                        <div 
+                            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }} 
+                            onClick={() => {
+                                setTempRate(exchangeRate.toString());
+                                setIsEditingRate(true);
+                            }}
+                            title="Haz clic para modificar la tasa"
+                        >
+                            <span>Tasa de Cambio Actual: <strong>$1 USD = RD$ {exchangeRate.toFixed(2)}</strong></span>
+                            <span style={{ fontSize: '0.7rem', color: '#3498db' }}>✏️</span>
+                        </div>
+                    )}
+                    <a 
+                        href="https://dgii.gov.do/estadisticas/tasaCambio/Paginas/default.aspx" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{ fontSize: '0.75rem', color: '#3498db', textDecoration: 'underline' }}
+                    >
+                        Verificar tasa actual
+                    </a>
                 </div>
 
                 {upcomingPayments.length > 0 && (

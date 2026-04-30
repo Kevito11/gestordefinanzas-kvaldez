@@ -13,6 +13,7 @@ export interface BudgetItem {
     payDay?: number;
     isExecuted?: boolean;
     executionDate?: string;
+    originalDate?: string;
 }
 
 interface BudgetSectionProps {

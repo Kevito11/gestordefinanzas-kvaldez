@@ -33,7 +33,7 @@ const PlanificadorMaestro: React.FC = () => {
     const [savings, setSavings] = useState<BudgetItem[]>([]);
     const [currency, setCurrency] = useState<'USD' | 'DOP'>('DOP');
     const [timeframe, setTimeframe] = useState<'mensual' | 'quincenal' | 'puntual' | 'original'>('mensual');
-    const [exchangeRate] = useState<number>(59.2362); 
+    const [exchangeRate, setExchangeRate] = useState<number>(59.2362); 
     const [isDataExchangeOpen, setIsDataExchangeOpen] = useState(false);
     const [actionsOpen, setActionsOpen] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -150,7 +150,7 @@ const PlanificadorMaestro: React.FC = () => {
                     payDay: expense.payDay,
                     isExecuted: expense.isExecuted,
                     category: 'Plan Maestro',
-                    startDate: new Date().toISOString()
+                    startDate: expense.originalDate || new Date().toISOString()
                 };
 
                 if (expense.id && typeof expense.id === 'string' && expense.id.length === 24) {
@@ -168,6 +168,9 @@ const PlanificadorMaestro: React.FC = () => {
             
             for (const dbTrx of dbTrxs) {
                 if (!dbTrx) continue;
+                // Evitar borrar transacciones que no sean de los tipos manejados en el Planificador (ej. ingresos o transferencias)
+                if (dbTrx.type !== 'expense' && dbTrx.type !== 'savings') continue;
+                
                 const dbId = dbTrx.id || (dbTrx as any)._id;
                 if (dbId && typeof dbId === 'string' && !trxIdsInUI.has(dbId)) {
                     await TransactionsAPI.delete(dbId);
@@ -195,7 +198,7 @@ const PlanificadorMaestro: React.FC = () => {
                     type: 'expense' as const,
                     category: 'Variable',
                     accountId: defaultAccountId,
-                    date: new Date().toISOString(),
+                    date: item.originalDate || new Date().toISOString(),
                     payDay: item.payDay,
                     periodicity: uiToDbPeriod(item.periodicity),
                     isExecuted: item.isExecuted
@@ -220,7 +223,7 @@ const PlanificadorMaestro: React.FC = () => {
                     type: 'savings' as const,
                     category: 'Ahorro',
                     accountId: defaultAccountId,
-                    date: new Date().toISOString(),
+                    date: item.originalDate || new Date().toISOString(),
                     payDay: item.payDay,
                     periodicity: uiToDbPeriod(item.periodicity),
                     isExecuted: item.isExecuted
@@ -239,7 +242,7 @@ const PlanificadorMaestro: React.FC = () => {
             window.location.reload(); 
         } catch (error) {
             console.error('Error al sincronizar planificación:', error);
-            alert('❌ Error al sincronizar. Verifica tu conexión.');
+            alert(`❌ Error al sincronizar: ${error instanceof Error ? error.message : 'Verifica tu conexión.'}`);
         } finally {
             setSaving(false);
         }
@@ -303,6 +306,7 @@ const PlanificadorMaestro: React.FC = () => {
                         payDay: b.payDay,
                         isExecuted: b.isExecuted,
                         executionDate: execsMap.get(b.id || b._id)?.executionDate,
+                        originalDate: b.startDate,
                         isCustom: true
                     })));
                 }
@@ -317,6 +321,7 @@ const PlanificadorMaestro: React.FC = () => {
                         payDay: t.payDay,
                         isExecuted: t.isExecuted,
                         executionDate: execsMap.get(t.id || t._id)?.executionDate,
+                        originalDate: t.date,
                         isCustom: true
                     })));
 
@@ -329,6 +334,7 @@ const PlanificadorMaestro: React.FC = () => {
                         payDay: t.payDay,
                         isExecuted: t.isExecuted,
                         executionDate: execsMap.get(t.id || t._id)?.executionDate,
+                        originalDate: t.date,
                         isCustom: true
                     })));
                 }
@@ -623,6 +629,7 @@ const PlanificadorMaestro: React.FC = () => {
                         totalSavings={totalSavings}
                         currency={currency}
                         exchangeRate={exchangeRate}
+                        setExchangeRate={setExchangeRate}
                         timeframe={timeframe}
                         budgetItems={[...fixedExpenses, ...variableExpenses]}
                     />
